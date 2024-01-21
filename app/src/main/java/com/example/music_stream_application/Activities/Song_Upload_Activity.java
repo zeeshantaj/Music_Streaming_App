@@ -20,6 +20,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.music_stream_application.R;
+import com.example.music_stream_application.Utils.FirebaseUtils;
 import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -125,7 +126,8 @@ public class Song_Upload_Activity extends AppCompatActivity {
                 imageRef.putFile(imageUri).addOnSuccessListener(taskSnapshot -> {
                     imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
                         String imageUrl = uri.toString();
-                        saveImageUrlInFirestore(imageUrl,title,name,autoCompleteTextView.getText().toString());
+                        //saveImageUrlInFirestore(imageUrl,title,name,autoCompleteTextView.getText().toString());
+                        FirebaseUtils.saveSongDataIntoFirebase(this,imageUrl,title,singerName,category,songUrl);
                         Toast.makeText(this, "Song Uploaded Successfully!", Toast.LENGTH_SHORT).show();
                     });
 
