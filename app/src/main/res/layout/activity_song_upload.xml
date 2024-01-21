@@ -20,19 +20,18 @@
                 android:layout_width="140dp"
                 android:layout_height="140dp"
                 app:cardCornerRadius="15dp"
+                app:cardBackgroundColor="@color/black"
                 android:layout_gravity="center_horizontal">
                 <ImageView
                     android:id="@+id/upload_song_cover_image"
                     android:layout_width="140dp"
                     android:layout_height="140dp"
                     android:layout_gravity="center"
-                    android:src="@drawable/ic_launcher_background"
+                    android:src="@drawable/select_image_placeholder"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
             </androidx.cardview.widget.CardView>
-
-
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
@@ -42,9 +41,10 @@
                 android:layout_marginTop="10dp"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/songTile"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:hint="Title"
+                    android:hint="Song Title"
                     android:textColorHint="@color/ice"
                     android:textColor="@color/ice"/>
             </com.google.android.material.textfield.TextInputLayout>
@@ -56,6 +56,7 @@
                 android:layout_marginTop="10dp"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
                 <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/singerName"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:hint="Singer Name"
@@ -63,28 +64,13 @@
                     android:textColor="@color/ice"/>
             </com.google.android.material.textfield.TextInputLayout>
             <com.google.android.material.textfield.TextInputLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginStart="20dp"
-                android:layout_marginEnd="20dp"
-                android:layout_marginTop="10dp"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
-                <com.google.android.material.textfield.TextInputEditText
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:hint="Category"
-                    android:textColorHint="@color/ice"
-                    android:textColor="@color/ice"/>
-            </com.google.android.material.textfield.TextInputLayout>
-
-         <com.google.android.material.textfield.TextInputLayout
              android:layout_width="match_parent"
              android:layout_height="wrap_content"
              android:layout_marginStart="40dp"
              android:layout_marginEnd="40dp"
              android:layout_marginTop="10dp"
              android:hint="Category"
-             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense.ExposedDropdownMenu">
 
              <AutoCompleteTextView
                  android:layout_width="match_parent"
@@ -93,7 +79,14 @@
                  android:id="@+id/uploadDropDownMenu"/>
 
          </com.google.android.material.textfield.TextInputLayout>
-
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/uploadBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Upload"
+                android:layout_marginTop="10dp"
+                android:layout_gravity="center_horizontal"
+                />
 
         </LinearLayout>
     </ScrollView>
