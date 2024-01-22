@@ -28,8 +28,8 @@
             />
 
         <ImageView
-            android:layout_width="220dp"
-            android:layout_height="220dp"
+            android:layout_width="240dp"
+            android:layout_height="240dp"
             android:id="@+id/song_gif_image_view"
             android:visibility="invisible"
             android:layout_gravity="center"/>
@@ -58,20 +58,68 @@
         android:textColor="@color/white"
         android:layout_marginTop="8dp"
         android:id="@+id/player_singerName"/>
-
-    <SeekBar
-        android:id="@+id/seekBar"
-        android:layout_width="0dp"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerInParent="true"
-        android:progress="0"
-        android:progressBackgroundTint="?android:textColor"
-        android:progressTint="?android:textColor"
-        android:thumbTint="?android:textColor"
-        app:layout_constraintBottom_toTopOf="@+id/play"
-        app:layout_constraintEnd_toStartOf="@+id/endTime"
-        app:layout_constraintStart_toEndOf="@+id/startTime" />
+        android:orientation="horizontal"
+        android:layout_marginTop="10dp"
+        android:weightSum="3">
 
+        <TextView
+            android:id="@+id/startTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="end"
+            android:layout_weight="1"
+            android:textColor="@color/ice"/>
+        <SeekBar
+            android:id="@+id/seekBar"
+            android:layout_width="230dp"
+            android:layout_height="wrap_content"
+            android:progress="0"
+            android:layout_weight="1"
+            android:progressBackgroundTint="@color/ice"
+            android:progressTint="@color/black"
+            android:thumbTint="@color/black"/>
 
+        <TextView
+            android:id="@+id/endTime"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:layout_weight="1"
+            android:textColor="@color/ice"/>
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="3"
+        android:layout_marginTop="10dp">
+
+       <ImageView
+           android:id="@+id/fastRewind"
+           android:layout_width="0dp"
+           android:layout_height="wrap_content"
+           android:src="@drawable/fast_rewind_icon"
+           android:layout_weight="1"
+           android:layout_gravity="center_vertical"/>
+
+       <ImageView
+           android:id="@+id/playBtn"
+           android:layout_width="0dp"
+           android:layout_height="wrap_content"
+           android:src="@drawable/play_icon"
+           android:layout_weight="1"/>
+
+       <ImageView
+           android:id="@+id/fastForward"
+           android:layout_width="0dp"
+           android:layout_height="wrap_content"
+           android:src="@drawable/fast_farword_icon"
+           android:layout_gravity="center_vertical"
+           android:layout_weight="1"/>
+
+    </LinearLayout>
 </LinearLayout>

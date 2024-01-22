@@ -2,6 +2,7 @@ package com.example.music_stream_application.Activities;
 
 import androidx.annotation.OptIn;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.media3.common.util.Log;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.exoplayer.DefaultLoadControl;
 import androidx.media3.exoplayer.DefaultRenderersFactory;
@@ -34,7 +35,12 @@ public class Player_Activity extends AppCompatActivity {
     private MediaPlayer mediaPlayer;
     private Handler handler;
 
-    @Override
+    private TextView startTime,endTime;
+    private ImageView playBtn,fastForward,fastRewind,playingGif;
+    private SeekBar seekBar;
+    private int total;
+    private boolean isPlaying;
+    @OptIn(markerClass = UnstableApi.class) @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.player_activity);
@@ -42,8 +48,21 @@ public class Player_Activity extends AppCompatActivity {
         singerName = findViewById(R.id.player_singerName);
         songName = findViewById(R.id.player_song_title_text_view);
         songImage = findViewById(R.id.player_songImg);
-        handler = new Handler();
+        playBtn = findViewById(R.id.playBtn);
+        fastForward = findViewById(R.id.fastForward);
+        fastRewind = findViewById(R.id.fastRewind);
+        startTime = findViewById(R.id.startTime);
+        endTime = findViewById(R.id.endTime);
+        seekBar = findViewById(R.id.seekBar);
+        playingGif = findViewById(R.id.song_gif_image_view);
 
+        handler = new Handler();
+        mediaPlayer = new MediaPlayer();
+        if ( mediaPlayer.isPlaying()) {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
 
 
         Intent intent = getIntent();
@@ -52,12 +71,17 @@ public class Player_Activity extends AppCompatActivity {
         String img = intent.getStringExtra("songImage");
         String songUrl = intent.getStringExtra("songUrl");
 
+        Log.e("MyApp","SongUrl "+songUrl);
+
         songName.setText(title);
         singerName.setText(name);
         Glide.with(this)
                 .load(img)
                 .into(songImage);
-        // play online
+//        Glide.with(this)
+//                .load(R.drawable.media_playing)
+//                .circleCrop()
+//                .into(playingGif);
 
 
             try {
@@ -72,7 +96,8 @@ public class Player_Activity extends AppCompatActivity {
             public void onPrepared(MediaPlayer mp) {
                 // Start playing when prepared
                 mediaPlayer.start();
-                progressBar.setVisibility(View.GONE); // Hide progress bar when playback starts
+
+                playingGif.setVisibility(View.VISIBLE);
                 updateSeekBar();
 
                 int duration = mp.getDuration();
@@ -85,13 +110,11 @@ public class Player_Activity extends AppCompatActivity {
             @Override
             public void onBufferingUpdate(MediaPlayer mp, int percent) {
                 if (percent < 100) {
-                    progressBar.setVisibility(View.VISIBLE); // Show progress bar while buffering
-                    progressBar.setIndeterminate(false);
-                    progressBar.setProgress(percent);
+
 
 
                 } else {
-                    progressBar.setVisibility(View.GONE); // Hide progress bar when buffering is complete
+
                 }
             }
         });
@@ -99,9 +122,25 @@ public class Player_Activity extends AppCompatActivity {
             @Override
             public void onCompletion(MediaPlayer mp) {
                 // Handle completion if needed
+
+                //endTime.setText(String.valueOf(total));
+
             }
         });
         mediaPlayer.prepareAsync();
+        playBtn.setOnClickListener(v -> {
+            playBtn.setImageResource(R.drawable.pause_icon);
+            if (isPlaying){
+                mediaPlayer.pause();
+                isPlaying = false;
+             //   playingGif.setVisibility(View.GONE);
+            } else {
+                mediaPlayer.start();
+                isPlaying = true;
+                playingGif.setVisibility(View.VISIBLE);
+               // playBtn.setImageResource(R.drawable.play_icon);
+            }
+        });
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -118,20 +157,14 @@ public class Player_Activity extends AppCompatActivity {
                 mediaPlayer.seekTo(seekBar.getProgress());
             }
         });
-        forward.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mediaPlayer.isPlaying()){
-                    mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() + 10000);
-                }
+        fastForward.setOnClickListener(v -> {
+            if (mediaPlayer.isPlaying()){
+                mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() + 10000);
             }
         });
-        backward.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mediaPlayer.isPlaying()){
-                    mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() - 10000);
-                }
+        fastRewind.setOnClickListener(v -> {
+            if (mediaPlayer.isPlaying()){
+                mediaPlayer.seekTo(mediaPlayer.getCurrentPosition() - 10000);
             }
         });
 
