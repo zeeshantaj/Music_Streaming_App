@@ -8,15 +8,18 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.music_stream_application.R;
@@ -33,6 +36,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,10 +45,14 @@ import kotlin.jvm.functions.Function1;
 
 public class Song_Upload_Activity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> imagePickLauncher;
+    private ActivityResultLauncher<String> audioPickLauncher;
     private Uri selectedImageUri;
     private ImageView songImage;
     private MaterialButton uploadBtn;
-    private TextInputEditText songTile,singerName;
+    private TextInputEditText songTile, singerName;
+    private TextView audioPickTxt;
+    private static final int PICK_AUDIO_REQUEST = 99;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,6 +62,7 @@ public class Song_Upload_Activity extends AppCompatActivity {
         uploadBtn = findViewById(R.id.uploadBtn);
         songTile = findViewById(R.id.songTile);
         singerName = findViewById(R.id.singerName);
+        audioPickTxt = findViewById(R.id.audioPickTxt);
 
         imagePickLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -66,11 +75,29 @@ public class Song_Upload_Activity extends AppCompatActivity {
                         }
                     }
                 });
+
+        audioPickLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(),
+                result -> {
+                    if (result != null) {
+                        // Handle the selected audio file URI here
+                        Uri selectedAudioUri = result;
+                        // Now you can use selectedAudioUri as needed
+                        String audioFileName = getFileName(selectedAudioUri);
+                        audioPickTxt.setText(audioFileName);
+                        // Do something with the audio file name
+                    } else {
+                        // No activity found to handle the intent
+                        // Handle the error or provide feedback to the user
+                        Toast.makeText(this, "No app available to handle audio file selection", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+
         songImage.setOnClickListener(v -> {
             ImagePicker.with(this)
-                    .cropSquare()	    			//Crop image(Optional), Check Customization for more option
-                    .compress(512)			//Final image size will be less than 4 MB(Optional)
-                    .maxResultSize(1080, 1080)	//Final image resolution will be less than 1080 x 1080(Optional)
+                    .cropSquare()                    //Crop image(Optional), Check Customization for more option
+                    .compress(512)            //Final image size will be less than 4 MB(Optional)
+                    .maxResultSize(1080, 1080)    //Final image resolution will be less than 1080 x 1080(Optional)
                     .createIntent(new Function1<Intent, Unit>() {
                         @Override
                         public Unit invoke(Intent intent) {
@@ -79,35 +106,45 @@ public class Song_Upload_Activity extends AppCompatActivity {
                         }
                     });
         });
+        audioPickTxt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                intent.setType("audio/*");
+                intent.putExtra(Intent.EXTRA_TITLE, "Select Audio File");
+                startActivityForResult(Intent.createChooser(intent, "Choose Audio File"), PICK_AUDIO_REQUEST);
+            }
+        });
 
-        String[] categoriesArray = {"English","Hindi","Rap","Classical","Romantic","Party"};
+        String[] categoriesArray = {"English", "Hindi", "Rap", "Classical", "Romantic", "Party"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this,
                 R.layout.drop_down_item,
                 categoriesArray
-                );
+        );
         AutoCompleteTextView autoCompleteTextView = findViewById(R.id.uploadDropDownMenu);
         autoCompleteTextView.setAdapter(adapter);
         autoCompleteTextView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Toast.makeText(Song_Upload_Activity.this, ""+autoCompleteTextView.getText().toString(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(Song_Upload_Activity.this, "" + autoCompleteTextView.getText().toString(), Toast.LENGTH_SHORT).show();
             }
         });
-
         uploadBtn.setOnClickListener(v -> {
 
             String title = songTile.getText().toString();
             String name = singerName.getText().toString();
             String category = autoCompleteTextView.getText().toString();
 
-            if (title.isEmpty()){
+            if (title.isEmpty()) {
                 Toast.makeText(this, "SongTitle is empty", Toast.LENGTH_SHORT).show();
                 return;
-            }if (name.isEmpty()){
+            }
+            if (name.isEmpty()) {
                 Toast.makeText(this, "SingerName is empty", Toast.LENGTH_SHORT).show();
                 return;
-            }if (category.isEmpty()){
+            }
+            if (category.isEmpty()) {
                 Toast.makeText(this, "Category is empty", Toast.LENGTH_SHORT).show();
                 return;
             }
@@ -117,7 +154,7 @@ public class Song_Upload_Activity extends AppCompatActivity {
             }
             if (!songTile.getText().toString().isEmpty() && singerName.getText().toString().isEmpty()
                     && autoCompleteTextView.getText().toString().isEmpty()
-                    && selectedImageUri != null){
+                    && selectedImageUri != null) {
                 FirebaseStorage storage = FirebaseStorage.getInstance();
                 StorageReference storageRef = storage.getReference();
                 String imagePath = "songs/images";
@@ -127,19 +164,33 @@ public class Song_Upload_Activity extends AppCompatActivity {
                     imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
                         String imageUrl = uri.toString();
                         //saveImageUrlInFirestore(imageUrl,title,name,autoCompleteTextView.getText().toString());
-                        FirebaseUtils.saveSongDataIntoFirebase(this,imageUrl,title,singerName,category,songUrl);
+                        // FirebaseUtils.saveSongDataIntoFirebase(this,imageUrl,title,singerName,category,songUrl);
                         Toast.makeText(this, "Song Uploaded Successfully!", Toast.LENGTH_SHORT).show();
                     });
 
                 }).addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error "+e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Error " + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                 });
 
 
             }
         });
     }
-    private void saveImageUrlInFirestore(String imageUrl,String title,String singer,String category) {
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == PICK_AUDIO_REQUEST && resultCode == RESULT_OK) {
+            // The user picked an audio file. Handle the selected file here.
+            Uri selectedAudioUri = data.getData();
+            String fileName = getFileName(selectedAudioUri);
+            audioPickTxt.setText(fileName);
+            // Do something with the selected audio file URI
+        }
+    }
+
+    private void saveImageUrlInFirestore(String imageUrl, String title, String singer, String category) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         Map<String, Object> data = new HashMap<>();
         data.put("imageUrl", imageUrl);
@@ -148,7 +199,7 @@ public class Song_Upload_Activity extends AppCompatActivity {
         data.put("category", category);
 
         // Specify the document path
-        String documentPath = "category/English/"+category+"/"+title;
+        String documentPath = "category/English/" + category + "/" + title;
 
         // Upload the image URL to Firestore
         db.document(documentPath)
@@ -167,5 +218,22 @@ public class Song_Upload_Activity extends AppCompatActivity {
                         Log.e("Firestore", "Error uploading image URL", e);
                     }
                 });
+    }
+
+    private String getFileName(Uri uri) {
+        String result = null;
+        if (uri.getScheme().equals("content")) {
+            try (Cursor cursor = getContentResolver().query(uri, null, null, null, null)) {
+                if (cursor != null && cursor.moveToFirst()) {
+                    int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                    if (index != -1) {
+                        result = cursor.getString(index);
+                    }
+                }
+            }
+        } else if (uri.getScheme().equals("file")) {
+            result = new File(uri.getPath()).getName();
+        }
+        return result;
     }
 }
