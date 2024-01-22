@@ -1,5 +1,6 @@
 package com.example.music_stream_application.Activities;
 
+import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -7,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -37,8 +39,11 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
@@ -46,13 +51,13 @@ import kotlin.jvm.functions.Function1;
 public class Song_Upload_Activity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> imagePickLauncher;
     private ActivityResultLauncher<String> audioPickLauncher;
-    private Uri selectedImageUri;
+    private Uri selectedImageUri,selectedAudioUri;
     private ImageView songImage;
     private MaterialButton uploadBtn;
     private TextInputEditText songTile, singerName;
     private TextView audioPickTxt;
     private static final int PICK_AUDIO_REQUEST = 99;
-
+    String[] categoriesArray = {"English", "Hindi", "Rap", "Classical", "Romantic", "Party"};
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,19 +84,11 @@ public class Song_Upload_Activity extends AppCompatActivity {
         audioPickLauncher = registerForActivityResult(new ActivityResultContracts.GetContent(),
                 result -> {
                     if (result != null) {
-                        // Handle the selected audio file URI here
-                        Uri selectedAudioUri = result;
-                        // Now you can use selectedAudioUri as needed
-                        String audioFileName = getFileName(selectedAudioUri);
-                        audioPickTxt.setText(audioFileName);
-                        // Do something with the audio file name
-                    } else {
-                        // No activity found to handle the intent
-                        // Handle the error or provide feedback to the user
-                        Toast.makeText(this, "No app available to handle audio file selection", Toast.LENGTH_SHORT).show();
+                        selectedAudioUri = result;
+                        String fileName = getFileName(selectedAudioUri);
+                        audioPickTxt.setText(fileName);
                     }
                 });
-
 
         songImage.setOnClickListener(v -> {
             ImagePicker.with(this)
@@ -109,14 +106,11 @@ public class Song_Upload_Activity extends AppCompatActivity {
         audioPickTxt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-                intent.setType("audio/*");
-                intent.putExtra(Intent.EXTRA_TITLE, "Select Audio File");
-                startActivityForResult(Intent.createChooser(intent, "Choose Audio File"), PICK_AUDIO_REQUEST);
+                audioPickLauncher.launch("audio/*");
             }
         });
 
-        String[] categoriesArray = {"English", "Hindi", "Rap", "Classical", "Romantic", "Party"};
+
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this,
                 R.layout.drop_down_item,
@@ -152,27 +146,78 @@ public class Song_Upload_Activity extends AppCompatActivity {
                 Toast.makeText(this, "Image is empty", Toast.LENGTH_SHORT).show();
                 return;
             }
-            if (!songTile.getText().toString().isEmpty() && singerName.getText().toString().isEmpty()
-                    && autoCompleteTextView.getText().toString().isEmpty()
-                    && selectedImageUri != null) {
-                FirebaseStorage storage = FirebaseStorage.getInstance();
-                StorageReference storageRef = storage.getReference();
-                String imagePath = "songs/images";
-                StorageReference imageRef = storageRef.child(imagePath);
-                Uri imageUri = selectedImageUri;
-                imageRef.putFile(imageUri).addOnSuccessListener(taskSnapshot -> {
-                    imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
-                        String imageUrl = uri.toString();
-                        //saveImageUrlInFirestore(imageUrl,title,name,autoCompleteTextView.getText().toString());
-                        // FirebaseUtils.saveSongDataIntoFirebase(this,imageUrl,title,singerName,category,songUrl);
-                        Toast.makeText(this, "Song Uploaded Successfully!", Toast.LENGTH_SHORT).show();
+            if (selectedAudioUri == null) {
+                Toast.makeText(this, "Image is empty", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+
+                StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+
+                StorageReference songTitleRef = storageRef.child("songs/" +category+"/"+ title);
+
+                //for image
+                StorageReference songImageRef = songTitleRef.child(title+"_"+name+"image.jpg");
+                UploadTask uploadImageTask = songImageRef.putFile(selectedImageUri);
+
+                // for audio
+                StorageReference songAudioRef = songTitleRef.child(title+"_"+name+"audio.mp3");
+                UploadTask uploadAudioTask = songAudioRef.putFile(selectedAudioUri);
+
+                // to combine both task
+                List<UploadTask> uploadTasks = new ArrayList<>();
+                uploadTasks.add(uploadImageTask);
+                uploadTasks.add(uploadAudioTask);
+
+                List<Uri> downloadUrls = new ArrayList<>();
+
+
+
+            int totalTasks = uploadTasks.size();
+                final AtomicInteger tasksCompleted = new AtomicInteger(0);
+                for (UploadTask task : uploadTasks) {
+                    task.addOnProgressListener(taskSnapshot -> {
+                        // Update progress here
+                        long bytesTransferred = taskSnapshot.getBytesTransferred();
+                        long totalBytes = taskSnapshot.getTotalByteCount();
+                        int progress = (int) ((bytesTransferred * 100) / totalBytes);
+
+                        // You can use the progress variable for updating a progress bar or UI
+                        Log.d("UploadProgress", "Progress: " + progress + "%");
                     });
 
+                task.addOnSuccessListener(taskSnapshot -> {
+                    // Handle success
+                    taskSnapshot.getStorage().getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            if (uri != null) {
+                                downloadUrls.add(uri);
+                                tasksCompleted.incrementAndGet();
+
+                                if (tasksCompleted.get() == totalTasks) {
+                                    if (!downloadUrls.isEmpty()) {
+                                        Uri imageDownloadUrl = downloadUrls.get(0);
+                                        Uri audioDownloadUrl = downloadUrls.get(1);
+                                        Log.e("MyApp", "image url" + imageDownloadUrl);
+                                        Log.e("MyApp", "audio url" + audioDownloadUrl);
+                                    } else {
+                                        // Handle the case where downloadUrls is empty
+                                        Log.e("MyApp", "Download URLs list is empty");
+                                    }
+                                }
+
+                                Toast.makeText(Song_Upload_Activity.this, "Completed ", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    });
+
+
+
+
                 }).addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error " + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Error "+e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                 });
-
-
             }
         });
     }
@@ -183,7 +228,7 @@ public class Song_Upload_Activity extends AppCompatActivity {
 
         if (requestCode == PICK_AUDIO_REQUEST && resultCode == RESULT_OK) {
             // The user picked an audio file. Handle the selected file here.
-            Uri selectedAudioUri = data.getData();
+            selectedAudioUri = data.getData();
             String fileName = getFileName(selectedAudioUri);
             audioPickTxt.setText(fileName);
             // Do something with the selected audio file URI
