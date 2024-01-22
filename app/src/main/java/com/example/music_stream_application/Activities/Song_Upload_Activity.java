@@ -21,11 +21,14 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.music_stream_application.Model.SongModel;
 import com.example.music_stream_application.R;
 import com.example.music_stream_application.Utils.FirebaseUtils;
+import com.github.abdularis.buttonprogress.DownloadButtonProgress;
 import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -51,13 +54,16 @@ import kotlin.jvm.functions.Function1;
 public class Song_Upload_Activity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> imagePickLauncher;
     private ActivityResultLauncher<String> audioPickLauncher;
-    private Uri selectedImageUri,selectedAudioUri;
+    private Uri selectedImageUri, selectedAudioUri;
     private ImageView songImage;
     private MaterialButton uploadBtn;
     private TextInputEditText songTile, singerName;
     private TextView audioPickTxt;
     private static final int PICK_AUDIO_REQUEST = 99;
     String[] categoriesArray = {"English", "Hindi", "Rap", "Classical", "Romantic", "Party"};
+    private ProgressBar uploadProgressBar;
+    private TextView progressPercentageTextView;
+    private String category;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -68,6 +74,9 @@ public class Song_Upload_Activity extends AppCompatActivity {
         songTile = findViewById(R.id.songTile);
         singerName = findViewById(R.id.singerName);
         audioPickTxt = findViewById(R.id.audioPickTxt);
+        uploadProgressBar = findViewById(R.id.your_upload_progress_bar_id);
+        progressPercentageTextView = findViewById(R.id.your_progress_percentage_text_view_id);
+
 
         imagePickLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -128,7 +137,7 @@ public class Song_Upload_Activity extends AppCompatActivity {
 
             String title = songTile.getText().toString();
             String name = singerName.getText().toString();
-            String category = autoCompleteTextView.getText().toString();
+            category = autoCompleteTextView.getText().toString();
 
             if (title.isEmpty()) {
                 Toast.makeText(this, "SongTitle is empty", Toast.LENGTH_SHORT).show();
@@ -152,74 +161,99 @@ public class Song_Upload_Activity extends AppCompatActivity {
             }
 
 
-                StorageReference storageRef = FirebaseStorage.getInstance().getReference();
+            StorageReference storageRef = FirebaseStorage.getInstance().getReference();
 
-                StorageReference songTitleRef = storageRef.child("songs/" +category+"/"+ title);
+            StorageReference songTitleRef = storageRef.child("songs/" + category + "/" + title);
 
-                //for image
-                StorageReference songImageRef = songTitleRef.child(title+"_"+name+"image.jpg");
-                UploadTask uploadImageTask = songImageRef.putFile(selectedImageUri);
+            //for image
+            StorageReference songImageRef = songTitleRef.child(title + "_" + name + "image.jpg");
+            UploadTask uploadImageTask = songImageRef.putFile(selectedImageUri);
 
-                // for audio
-                StorageReference songAudioRef = songTitleRef.child(title+"_"+name+"audio.mp3");
-                UploadTask uploadAudioTask = songAudioRef.putFile(selectedAudioUri);
+            // for audio
+            StorageReference songAudioRef = songTitleRef.child(title + "_" + name + "audio.mp3");
+            UploadTask uploadAudioTask = songAudioRef.putFile(selectedAudioUri);
 
-                // to combine both task
-                List<UploadTask> uploadTasks = new ArrayList<>();
-                uploadTasks.add(uploadImageTask);
-                uploadTasks.add(uploadAudioTask);
+            // to combine both task
+            List<UploadTask> uploadTasks = new ArrayList<>();
+            uploadTasks.add(uploadImageTask);
+            uploadTasks.add(uploadAudioTask);
 
-                List<Uri> downloadUrls = new ArrayList<>();
-
+            List<Uri> downloadUrls = new ArrayList<>();
 
 
             int totalTasks = uploadTasks.size();
-                final AtomicInteger tasksCompleted = new AtomicInteger(0);
-                for (UploadTask task : uploadTasks) {
-                    task.addOnProgressListener(taskSnapshot -> {
-                        // Update progress here
-                        long bytesTransferred = taskSnapshot.getBytesTransferred();
-                        long totalBytes = taskSnapshot.getTotalByteCount();
-                        int progress = (int) ((bytesTransferred * 100) / totalBytes);
+            final AtomicInteger tasksCompleted = new AtomicInteger(0);
+            for (UploadTask task : uploadTasks) {
+                task.addOnProgressListener(taskSnapshot -> {
+                    // Update progress here
+                    long bytesTransferred = taskSnapshot.getBytesTransferred();
+                    long totalBytes = taskSnapshot.getTotalByteCount();
+                    int progress = (int) ((bytesTransferred * 100) / totalBytes);
 
-                        // You can use the progress variable for updating a progress bar or UI
-                        Log.d("UploadProgress", "Progress: " + progress + "%");
-                    });
+                    updateProgressUI(progress);
+
+                });
 
                 task.addOnSuccessListener(taskSnapshot -> {
                     // Handle success
-                    taskSnapshot.getStorage().getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                        @Override
-                        public void onSuccess(Uri uri) {
-                            if (uri != null) {
-                                downloadUrls.add(uri);
-                                tasksCompleted.incrementAndGet();
+                    taskSnapshot.getStorage().getDownloadUrl().addOnSuccessListener(uri -> {
+                        if (uri != null) {
+                            downloadUrls.add(uri);
+                            tasksCompleted.incrementAndGet();
 
-                                if (tasksCompleted.get() == totalTasks) {
-                                    if (!downloadUrls.isEmpty()) {
-                                        Uri imageDownloadUrl = downloadUrls.get(0);
-                                        Uri audioDownloadUrl = downloadUrls.get(1);
-                                        Log.e("MyApp", "image url" + imageDownloadUrl);
-                                        Log.e("MyApp", "audio url" + audioDownloadUrl);
-                                    } else {
-                                        // Handle the case where downloadUrls is empty
-                                        Log.e("MyApp", "Download URLs list is empty");
-                                    }
+                            if (tasksCompleted.get() == totalTasks) {
+                                if (!downloadUrls.isEmpty()) {
+                                    Uri imageDownloadUrl = downloadUrls.get(0);
+                                    Uri audioDownloadUrl = downloadUrls.get(1);
+
+
+                                    long millis = System.currentTimeMillis();
+                                    String id = String.valueOf(millis);
+                                    int viewCount = 0;
+                                    SongModel songModel = new SongModel(title, name, imageDownloadUrl.toString(), audioDownloadUrl.toString(), id, viewCount);
+
+
+                                    FirebaseFirestore db = FirebaseFirestore.getInstance();
+                                    String documentPath = "category/"+category+"/" + category + "/" + title;
+
+                                    db.document(documentPath)
+                                            .set(songModel, SetOptions.merge())
+                                            .addOnSuccessListener(unused -> {
+                                                btnUiUpdate();
+                                                Toast.makeText(Song_Upload_Activity.this, "Song Uploaded Successfully ", Toast.LENGTH_SHORT).show();
+                                                snackBar();
+                                            }).addOnFailureListener(e -> Toast.makeText(Song_Upload_Activity.this, "Error "+e.getLocalizedMessage(), Toast.LENGTH_SHORT).show());
                                 }
-
-                                Toast.makeText(Song_Upload_Activity.this, "Completed ", Toast.LENGTH_SHORT).show();
                             }
+
+
+
                         }
                     });
 
 
-
-
                 }).addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error "+e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Error " + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                    uploadBtn.setEnabled(true);
                 });
             }
         });
+
+    }
+
+    private void snackBar(){
+        Snackbar snackbar = Snackbar.make(findViewById(android.R.id.content),
+                "Upload complete!",
+                Snackbar.LENGTH_INDEFINITE);
+        snackbar.setAction("View", v -> {
+
+            Intent intent = new Intent(this, Song_List_Activity.class);
+            intent.putExtra("categoryName",category);
+            startActivity(intent);
+        });
+
+        // Show the Snackbar
+        snackbar.show();
     }
 
     @Override
@@ -235,34 +269,22 @@ public class Song_Upload_Activity extends AppCompatActivity {
         }
     }
 
-    private void saveImageUrlInFirestore(String imageUrl, String title, String singer, String category) {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        Map<String, Object> data = new HashMap<>();
-        data.put("imageUrl", imageUrl);
-        data.put("title", title);
-        data.put("singerName", singer);
-        data.put("category", category);
+    private void btnUiUpdate() {
+        uploadBtn.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.baseline_check_24, 0);
+        uploadBtn.setText("Uploaded");
+        uploadBtn.setBackgroundColor(getResources().getColor(R.color.green));
+        uploadBtn.setEnabled(false);
+    }
 
-        // Specify the document path
-        String documentPath = "category/English/" + category + "/" + title;
+    private void updateProgressUI(int progress) {
+        // Update the progress bar
+        uploadProgressBar.setVisibility(View.VISIBLE);
+        progressPercentageTextView.setVisibility(View.VISIBLE);
+        uploadProgressBar.setProgress(progress);
 
-        // Upload the image URL to Firestore
-        db.document(documentPath)
-                .set(data, SetOptions.merge())
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        // Image URL uploaded successfully
-                        Log.d("Firestore", "Image URL uploaded successfully");
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        // Handle the failure
-                        Log.e("Firestore", "Error uploading image URL", e);
-                    }
-                });
+        // Update the progress percentage text view
+        String progressText = progress + "%";
+        progressPercentageTextView.setText(progressText);
     }
 
     private String getFileName(Uri uri) {

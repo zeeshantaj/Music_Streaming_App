@@ -1,16 +1,16 @@
 package com.example.music_stream_application.Model;
 
 public class SongListModel {
-    private String id,imageUrl,songUrl,subtitle,title;
+    private String id,imageUrl,songUrl, singerName,title;
 
     public SongListModel() {
     }
 
-    public SongListModel(String id, String imageUrl, String songUrl, String subtitle, String title) {
+    public SongListModel(String id, String imageUrl, String songUrl, String singerName, String title) {
         this.id = id;
         this.imageUrl = imageUrl;
         this.songUrl = songUrl;
-        this.subtitle = subtitle;
+        this.singerName = singerName;
         this.title = title;
     }
 
@@ -26,8 +26,8 @@ public class SongListModel {
         return songUrl;
     }
 
-    public String getSubtitle() {
-        return subtitle;
+    public String getSingerName() {
+        return singerName;
     }
 
     public String getTitle() {
