@@ -1,5 +1,6 @@
 package com.example.music_stream_application.Adapter;
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,15 +11,17 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.music_stream_application.Activities.Player_Activity;
 import com.example.music_stream_application.Model.SongListModel;
+import com.example.music_stream_application.Model.SongModel;
 import com.example.music_stream_application.R;
 
 import java.util.List;
 
 public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.Viewholder> {
-    private List<SongListModel> songListModels;
+    private List<SongModel> songListModels;
 
-    public SongListAdapter(List<SongListModel> songListModels) {
+    public SongListAdapter(List<SongModel> songListModels) {
         this.songListModels = songListModels;
     }
 
@@ -31,13 +34,22 @@ public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.Viewho
 
     @Override
     public void onBindViewHolder(@NonNull SongListAdapter.Viewholder holder, int position) {
-        SongListModel model = songListModels.get(position);
+        SongModel model = songListModels.get(position);
         holder.title.setText(model.getTitle());
         holder.singerName.setText(model.getSingerName());
 
         Glide.with(holder.itemView.getContext())
                 .load(model.getImageUrl())
                 .into(holder.imageView);
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(v.getContext(), Player_Activity.class);
+            intent.putExtra("songName",model.getTitle());
+            intent.putExtra("singerName",model.getSingerName());
+            intent.putExtra("songImage",model.getImageUrl());
+            intent.putExtra("songUrl",model.getSongUrl());
+            v.getContext().startActivity(intent);
+        });
+
     }
 
     @Override

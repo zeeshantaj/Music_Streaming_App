@@ -23,7 +23,7 @@
         <ImageView
             android:layout_width="140dp"
             android:layout_height="140dp"
-            android:id="@+id/song_cover_image_view"
+            android:id="@+id/player_songImg"
             android:layout_gravity="center"
             />
 
@@ -41,25 +41,37 @@
         android:layout_height="wrap_content"
         android:textSize="22sp"
         tools:text="Song name"
+        android:singleLine="true"
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:clickable="true"
+
         android:textColor="@color/white"
         android:layout_marginTop="16dp"
         android:textStyle="bold"
-        android:id="@+id/song_title_text_view"/>
+        android:id="@+id/player_song_title_text_view"/>
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="20sp"
-        tools:text="Album"
+        tools:text="Singer"
         android:textColor="@color/white"
         android:layout_marginTop="8dp"
-        android:id="@+id/song_subtitle_text_view"/>
+        android:id="@+id/player_singerName"/>
 
-    <androidx.media3.ui.PlayerView
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:layout_marginTop="8dp"
-        app:hide_on_touch="false"
-        app:show_timeout="0"
-        android:id="@+id/player_view"
-        />
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerInParent="true"
+        android:progress="0"
+        android:progressBackgroundTint="?android:textColor"
+        android:progressTint="?android:textColor"
+        android:thumbTint="?android:textColor"
+        app:layout_constraintBottom_toTopOf="@+id/play"
+        app:layout_constraintEnd_toStartOf="@+id/endTime"
+        app:layout_constraintStart_toEndOf="@+id/startTime" />
+
+
 </LinearLayout>

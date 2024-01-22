@@ -15,6 +15,7 @@ import com.example.music_stream_application.Adapter.SongListAdapter;
 import com.example.music_stream_application.MainActivity;
 import com.example.music_stream_application.Model.CategoryModel;
 import com.example.music_stream_application.Model.SongListModel;
+import com.example.music_stream_application.Model.SongModel;
 import com.example.music_stream_application.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -27,7 +28,7 @@ import java.util.List;
 public class Song_List_Activity extends AppCompatActivity {
 
     private RecyclerView listRecycler;
-    private List<SongListModel> songListModelList;
+    private List<SongModel> songListModelList;
     private SongListAdapter listAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,7 +56,7 @@ public class Song_List_Activity extends AppCompatActivity {
                     @Override
                     public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
 
-                        songListModelList = queryDocumentSnapshots.toObjects(SongListModel.class);
+                        songListModelList = queryDocumentSnapshots.toObjects(SongModel.class);
                         listAdapter = new SongListAdapter(songListModelList);
                         listRecycler.setAdapter(listAdapter);
 
