@@ -15,6 +15,7 @@ import androidx.media3.exoplayer.trackselection.DefaultTrackSelector;
 import androidx.media3.ui.PlayerView;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -32,6 +33,9 @@ import com.example.music_stream_application.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Transaction;
@@ -56,11 +60,16 @@ public class Player_Activity extends AppCompatActivity {
     private int total;
     private boolean isPlaying;
     private int viewCount = 0;
-    private String songUrl,title;
+    private String songUrl,title,categoryType;
+    SharedPreferences sharedPreferences;
     @OptIn(markerClass = UnstableApi.class) @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.player_activity);
+
+        sharedPreferences = getSharedPreferences("categorySharedPreference",MODE_PRIVATE);
+        categoryType = sharedPreferences.getString("categoryType","");
+
 
         singerName = findViewById(R.id.player_singerName);
         songName = findViewById(R.id.player_song_title_text_view);
@@ -186,37 +195,48 @@ public class Player_Activity extends AppCompatActivity {
 
     }
     private void addViewCount(){
-        System.out.println("Count "+viewCount);
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-       // String documentPath = "category/"+category+"/" + category + "/" + title;
+        String documentPath = "category/"+categoryType+"/" + categoryType + "/" + title;
 
-        try {
-            URI uri = new URI("https://firebasestorage.googleapis.com/v0/b/musicstream-b5a67.appspot.com/o/songs%2FClassical%2Ftere%2Ftere_ksiaudio.mp3?alt=media&token=23210a71-0016-4cc4-a75c-41f20750e01d");
-            Path path = Paths.get(uri.getPath());
+        firestore.runTransaction(new Transaction.Function<Void>() {
+                    @Nullable
+                    @Override
+                    public Void apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
+                        DocumentReference documentReference = firestore.document(documentPath);
 
-            boolean foundSongs = false;
+                        // Retrieve current viewCount
+                        DocumentSnapshot documentSnapshot = transaction.get(documentReference);
+                        int currentCount = documentSnapshot.getLong("viewCount").intValue();
 
-            for (int i = 0; i < path.getNameCount(); i++) {
-                String segment = path.getName(i).toString();
+                        // Increment viewCount by 1
+                        transaction.update(documentReference, "viewCount", currentCount + 1);
 
-                if (foundSongs) {
-                    // This is the segment following "/songs/"
-                    System.out.println("Dynamic Word: " + segment);
-                    break;
-                }
+                        return null;
+                    }
+                })
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Toast.makeText(Player_Activity.this, "count++", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(Player_Activity.this, "Error "+e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+        firestore.document(documentPath).addSnapshotListener(new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
+                int currentCount = value.get("viewCount",Integer.class);
+                String singerName = value.get("singerName",String.class);
+                System.out.println("document value "+currentCount+singerName);
 
-                // Check if the current segment is "/songs/" or a similar pattern
-                if (segment.toLowerCase().contains("songs")) {
-                    foundSongs = true;
-                }
             }
+        });
 
-            if (!foundSongs) {
-                System.out.println("URL does not contain the expected '/songs/' part.");
-            }
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
+
     }
     public String millisecondsToTime(long milliseconds) {
         int hours = (int) (milliseconds / (1000 * 60 * 60));
@@ -256,4 +276,11 @@ public class Player_Activity extends AppCompatActivity {
         }, 1000);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mediaPlayer.release();
+        mediaPlayer.stop();
+        sharedPreferences.edit().clear();
+    }
 }

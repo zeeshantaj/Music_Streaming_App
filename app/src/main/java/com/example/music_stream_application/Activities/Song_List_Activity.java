@@ -6,10 +6,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
+import com.bumptech.glide.disklrucache.DiskLruCache;
 import com.example.music_stream_application.Adapter.Category_Adapter;
 import com.example.music_stream_application.Adapter.SongListAdapter;
 import com.example.music_stream_application.MainActivity;
@@ -30,11 +33,12 @@ public class Song_List_Activity extends AppCompatActivity {
     private RecyclerView listRecycler;
     private List<SongModel> songListModelList;
     private SongListAdapter listAdapter;
+    private SharedPreferences sharedPreferences;
+    SharedPreferences.Editor editor;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_song_list);
-
 
 
         Intent intent = getIntent();
@@ -42,7 +46,27 @@ public class Song_List_Activity extends AppCompatActivity {
         Log.e("MyApp","cat name "+name);
 
 
+        sharedPreferences = getSharedPreferences("categorySharedPreference",MODE_PRIVATE);
+        editor = sharedPreferences.edit();
+        editor.putString("categoryType", name); // Use the appropriate method based on the data type
+        editor.apply();
+
         songListData(name);
+    }
+
+    @Override
+    protected void onDestroy() {
+        editor.clear();
+        Log.e("MyApp","song list actvity on destory");
+        super.onDestroy();
+
+    }
+
+    @Override
+    protected void onStop() {
+        Log.e("MyApp","song list actvity on stop");
+
+        super.onStop();
     }
 
     private void songListData(String path){
@@ -67,6 +91,8 @@ public class Song_List_Activity extends AppCompatActivity {
                         Toast.makeText(Song_List_Activity.this, "Error "+e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
+
+
 
     }
 

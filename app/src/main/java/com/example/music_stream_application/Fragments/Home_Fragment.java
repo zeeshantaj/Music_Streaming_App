@@ -1,9 +1,11 @@
 package com.example.music_stream_application.Fragments;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -18,11 +20,14 @@ import com.example.music_stream_application.Model.CategoryModel;
 import com.example.music_stream_application.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class Home_Fragment extends Fragment {
 
@@ -31,14 +36,18 @@ public class Home_Fragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.home_frgment,container,false);
     }
-    private RecyclerView categoryRecyclerView;
+    private RecyclerView categoryRecyclerView,trendingRecyclerView;
     private Category_Adapter categoryAdapter;
     private List<CategoryModel> categoryModelList;
+    private LinearLayout trendingContainer;
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         categoryRecyclerView = view.findViewById(R.id.categories_recycler_view);
+        trendingRecyclerView = view.findViewById(R.id.trending_recycler_view);
+        trendingContainer = view.findViewById(R.id.trendingContainer);
         categoryData();
+        trendingData();
     }
     private void categoryData(){
         categoryModelList = new ArrayList<>();
@@ -61,6 +70,68 @@ public class Home_Fragment extends Fragment {
                     }
                 });
 
+    }
+
+    private void trendingData(){
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+        firestore.collection("category").get()
+                .addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        for (QueryDocumentSnapshot categoryDocument : queryDocumentSnapshots) {
+                            String categoryName = categoryDocument.getId();
+
+                            // Assuming each category has a subcollection with the same name as the category
+                            CollectionReference songsCollection = categoryDocument.getReference().collection(categoryName);
+
+                            // Query songs within the subcollection
+                            songsCollection.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                                @Override
+                                public void onSuccess(QuerySnapshot songQueryDocumentSnapshots) {
+                                    for (QueryDocumentSnapshot songDocument : songQueryDocumentSnapshots) {
+                                        String songTitle = songDocument.getId();
+                                        // Retrieve other song details as needed
+                                        // For example: String singerName = songDocument.getString("singerName");
+
+                                        //int viewCount = songDocument.getLong("viewCount").intValue();
+
+
+                                        // Now you can work with the category, songTitle, and other details
+                                        //CollectionReference songsCollection = categoryDocument.getReference().collection(songTitle);
+
+                                        Long viewCount = songDocument.getLong("viewCount");
+
+                                        if (viewCount != null) {
+                                            int viewCountValue = viewCount.intValue();
+
+                                            // Now you can work with the category, songTitle, and other details
+                                            Log.d("Firestore", "Category: " + categoryName + ", Song: " + songTitle + ", ViewCount: " + viewCountValue);
+
+                                            if (viewCount >= 2){
+                                                // add trend recyclerView item here
+                                            }
+
+                                        } else {
+                                            Log.e("Firestore", "ViewCount field not found for song: " + songTitle);
+                                        }
+
+                                    }
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.e("Firestore", "Error getting songs for category " + categoryName, e);
+                                }
+                            });
+                        }
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.e("Firestore", "Error getting categories", e);
+                    }
+                });
     }
 
 }
