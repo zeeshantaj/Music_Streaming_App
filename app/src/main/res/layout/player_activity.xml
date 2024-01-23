@@ -27,6 +27,7 @@
             android:layout_gravity="center"
             />
 
+
         <ImageView
             android:layout_width="240dp"
             android:layout_height="240dp"

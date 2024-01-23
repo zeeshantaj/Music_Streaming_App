@@ -1,5 +1,7 @@
 package com.example.music_stream_application.Activities;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.OptIn;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.media3.common.util.Log;
@@ -21,11 +23,24 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.music_stream_application.R;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.Transaction;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Locale;
 
 public class Player_Activity extends AppCompatActivity {
@@ -40,6 +55,8 @@ public class Player_Activity extends AppCompatActivity {
     private SeekBar seekBar;
     private int total;
     private boolean isPlaying;
+    private int viewCount = 0;
+    private String songUrl,title;
     @OptIn(markerClass = UnstableApi.class) @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,10 +83,10 @@ public class Player_Activity extends AppCompatActivity {
 
 
         Intent intent = getIntent();
-        String title = intent.getStringExtra("songName");
+        title = intent.getStringExtra("songName");
         String name = intent.getStringExtra("singerName");
         String img = intent.getStringExtra("songImage");
-        String songUrl = intent.getStringExtra("songUrl");
+        songUrl = intent.getStringExtra("songUrl");
 
         Log.e("MyApp","SongUrl "+songUrl);
 
@@ -77,12 +94,8 @@ public class Player_Activity extends AppCompatActivity {
         singerName.setText(name);
         Glide.with(this)
                 .load(img)
+                .apply(RequestOptions.bitmapTransform(new RoundedCorners(32)))
                 .into(songImage);
-//        Glide.with(this)
-//                .load(R.drawable.media_playing)
-//                .circleCrop()
-//                .into(playingGif);
-
 
             try {
                 mediaPlayer.setDataSource(songUrl);
@@ -104,6 +117,9 @@ public class Player_Activity extends AppCompatActivity {
                 String formattedTime = millisecondsToTime(duration);
                 endTime.setText(formattedTime);
                 isPlaying = true;
+                viewCount += 1;
+
+                addViewCount();
             }
         });
         mediaPlayer.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
@@ -168,6 +184,39 @@ public class Player_Activity extends AppCompatActivity {
             }
         });
 
+    }
+    private void addViewCount(){
+        System.out.println("Count "+viewCount);
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+       // String documentPath = "category/"+category+"/" + category + "/" + title;
+
+        try {
+            URI uri = new URI("https://firebasestorage.googleapis.com/v0/b/musicstream-b5a67.appspot.com/o/songs%2FClassical%2Ftere%2Ftere_ksiaudio.mp3?alt=media&token=23210a71-0016-4cc4-a75c-41f20750e01d");
+            Path path = Paths.get(uri.getPath());
+
+            boolean foundSongs = false;
+
+            for (int i = 0; i < path.getNameCount(); i++) {
+                String segment = path.getName(i).toString();
+
+                if (foundSongs) {
+                    // This is the segment following "/songs/"
+                    System.out.println("Dynamic Word: " + segment);
+                    break;
+                }
+
+                // Check if the current segment is "/songs/" or a similar pattern
+                if (segment.toLowerCase().contains("songs")) {
+                    foundSongs = true;
+                }
+            }
+
+            if (!foundSongs) {
+                System.out.println("URL does not contain the expected '/songs/' part.");
+            }
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
     }
     public String millisecondsToTime(long milliseconds) {
         int hours = (int) (milliseconds / (1000 * 60 * 60));

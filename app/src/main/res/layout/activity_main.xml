@@ -7,56 +7,26 @@
     tools:context=".MainActivity"
     android:background="@color/purple">
 
-    <RelativeLayout
+
+    <FrameLayout
+        android:id="@+id/homeParentFrameLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/toolbar">
-        <ImageView
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@drawable/logo"
-            android:layout_centerVertical="true"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Welcome back"
-            android:textColor="@color/white"
-            android:textSize="24sp"
-            android:gravity="center"/>
-        <ImageView
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@drawable/icon_menu"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"/>
-    </RelativeLayout>
+        android:layout_above="@id/bottomSheetNavigation"
+        android:layout_alignParentTop="true"/>
 
 
-    <ScrollView
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottomSheetNavigation"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="16dp"
-        android:layout_below="@id/toolbar">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Categories"
-                android:textColor="@color/white"
-                android:textSize="20sp"
-                android:fontFamily="sans-serif-medium"/>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="5dp"
-                android:id="@+id/categories_recycler_view"/>
-        </LinearLayout>
-    </ScrollView>
+        android:layout_height="wrap_content"
+        android:background="@color/black"
+        app:menu="@menu/nav_menu"
+        app:itemIconTint="@color/purple"
+        style="@style/Widget.MaterialComponents.BottomNavigationView.Colored"
+        android:layout_alignParentBottom="true"
+        app:itemRippleColor="@color/ice"
+        app:itemActiveIndicatorStyle="@style/App.Custom.Indicator"
+        app:labelVisibilityMode="unlabeled"
+        />
 </RelativeLayout>
