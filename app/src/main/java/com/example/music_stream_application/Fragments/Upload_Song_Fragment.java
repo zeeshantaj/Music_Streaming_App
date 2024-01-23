@@ -207,10 +207,11 @@ public class Upload_Song_Fragment extends Fragment {
                                     Uri audioDownloadUrl = downloadUrls.get(1);
 
 
-                                    long millis = System.currentTimeMillis();
-                                    String id = String.valueOf(millis);
+                                    long id = System.currentTimeMillis();
+
                                     int viewCount = 0;
-                                    SongModel songModel = new SongModel(title, name, imageDownloadUrl.toString(), audioDownloadUrl.toString(), id, viewCount);
+
+                                    SongModel songModel = new SongModel(title, name, imageDownloadUrl.toString(), audioDownloadUrl.toString(),id, viewCount);
 
 
                                     FirebaseFirestore db = FirebaseFirestore.getInstance();

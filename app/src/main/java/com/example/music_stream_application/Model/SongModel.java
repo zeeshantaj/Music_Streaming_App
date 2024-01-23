@@ -1,14 +1,15 @@
 package com.example.music_stream_application.Model;
 
 public class SongModel {
-    private String title,singerName,imageUrl,songUrl,id;
+    private String title,singerName,imageUrl,songUrl;
     private int viewCount;
+    private long id;
 
 
     public SongModel() {
     }
 
-    public SongModel(String title, String singerName, String imageUrl, String songUrl, String id, int viewCount) {
+    public SongModel(String title, String singerName, String imageUrl, String songUrl, long id, int viewCount) {
         this.title = title;
         this.singerName = singerName;
         this.imageUrl = imageUrl;
@@ -57,11 +58,11 @@ public class SongModel {
         this.songUrl = songUrl;
     }
 
-    public String getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(long id) {
         this.id = id;
     }
 }

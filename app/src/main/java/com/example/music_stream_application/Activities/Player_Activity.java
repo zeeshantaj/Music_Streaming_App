@@ -279,8 +279,8 @@ public class Player_Activity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mediaPlayer.release();
-        mediaPlayer.stop();
+//        mediaPlayer.release();
+//        mediaPlayer.stop();
         sharedPreferences.edit().clear();
     }
 }
