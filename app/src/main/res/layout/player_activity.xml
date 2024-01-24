@@ -6,7 +6,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:gravity="center_horizontal"
-    android:background="@drawable/play_icon"
+    android:background="@color/purple"
     android:id="@+id/play_activity_container">
 
     <eightbitlab.com.blurview.BlurView

@@ -1,10 +1,13 @@
 package com.example.music_stream_application.Fragments;
 
+import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -14,6 +17,9 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.music_stream_application.Adapter.Category_Adapter;
 import com.example.music_stream_application.Adapter.TrendingAdapter;
 import com.example.music_stream_application.MainActivity;
@@ -28,8 +34,13 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import eightbitlab.com.blurview.BlurView;
+import eightbitlab.com.blurview.RenderScriptBlur;
 
 public class Home_Fragment extends Fragment {
 
@@ -45,15 +56,24 @@ public class Home_Fragment extends Fragment {
     private List<CategoryModel> categoryModelList;
     private List<SongModel> trendingList;
     private LinearLayout trendingContainer;
+    private List<String> imageList;
 
+    private LinearLayout allSongContainer;
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         categoryRecyclerView = view.findViewById(R.id.categories_recycler_view);
         trendingRecyclerView = view.findViewById(R.id.trending_recycler_view);
         trendingContainer = view.findViewById(R.id.trendingContainer);
+        allSongContainer = view.findViewById(R.id.allSongContainer);
         categoryData();
         trendingData();
+        getAllSongImage();
+
+        allSongContainer.setOnClickListener(v -> {
+            Toast.makeText(getActivity(), "CLicked", Toast.LENGTH_SHORT).show();
+        });
+
     }
 
     private void categoryData() {
@@ -76,13 +96,10 @@ public class Home_Fragment extends Fragment {
                         Toast.makeText(getActivity(), "Error " + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
-
     }
-
     private void trendingData() {
-
         trendingList = new ArrayList<>();
-         // Replace with your RecyclerView ID
+
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false);
         trendingRecyclerView.setLayoutManager(layoutManager);
 
@@ -107,9 +124,7 @@ public class Home_Fragment extends Fragment {
                                         Long viewCount = songDocument.getLong("viewCount");
                                         if (viewCount != null) {
                                             int viewCountValue = viewCount.intValue();
-
-                                            Log.d("Firestore", "Category: " + categoryName + ", Song: " + songTitle + ", ViewCount: " + viewCountValue);
-
+                                            //Log.d("Firestore", "Category: " + categoryName + ", Song: " + songTitle + ", ViewCount: " + viewCountValue);
                                             if (viewCount >= 2) {
                                                 // add trend recyclerView item here
                                                 SongModel model = songDocument.toObject(SongModel.class);
@@ -142,5 +157,89 @@ public class Home_Fragment extends Fragment {
                         Log.e("Firestore", "Error getting categories", e);
                     }
                 });
+    }
+
+    private void getAllSongImage(){
+        imageList = new ArrayList<>();
+
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+        firestore.collection("category").get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    for (QueryDocumentSnapshot categoryDocument : queryDocumentSnapshots) {
+                        String categoryName = categoryDocument.getId();
+
+                        // Assuming each category has a subcollection with the same name as the category
+                        CollectionReference songsCollection = categoryDocument.getReference().collection(categoryName);
+
+                        // Query songs within the subcollection
+                        songsCollection.get().addOnSuccessListener(songQueryDocumentSnapshots -> {
+                            int counter = 0;
+                            for (QueryDocumentSnapshot songDocument : songQueryDocumentSnapshots) {
+                                String imageUrl = songDocument.get("imageUrl",String.class);
+                                imageList.add(imageUrl);
+                                counter++;
+                                if (counter >= 15) {
+                                    // Stop the loop if 15 URLs are loaded
+                                    break;
+                                }
+
+                                Log.e("Firestore", "image url "+counter + imageUrl);
+                            }
+                            loadImagesIntoImageViews();
+                        }).addOnFailureListener(e -> {
+                            Toast.makeText(getActivity(), "Error "+e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                            Log.e("Firestore", "Error getting image " + categoryName, e);
+                        });
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(getActivity(), "Error "+e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                    Log.e("Firestore", "Error getting categories", e);
+                });
+    }
+
+    private void loadImagesIntoImageViews() {
+        // Assuming you have an array of ImageViews in your layout
+        ImageView[] imageViews = new ImageView[]{
+                getActivity().findViewById(R.id.img),
+                getActivity().findViewById(R.id.img1),
+                getActivity().findViewById(R.id.img2),
+                getActivity().findViewById(R.id.img3),
+                getActivity().findViewById(R.id.img4),
+                getActivity().findViewById(R.id.img5),
+                getActivity().findViewById(R.id.img6),
+                getActivity().findViewById(R.id.img7),
+                getActivity().findViewById(R.id.img8),
+                getActivity().findViewById(R.id.img9),
+                getActivity().findViewById(R.id.img10),
+                getActivity().findViewById(R.id.img11),
+                getActivity().findViewById(R.id.img12),
+                getActivity().findViewById(R.id.img13),
+                getActivity().findViewById(R.id.img14)
+        };
+
+        // Loop through the imageList and load each URL into the corresponding ImageView using Glide
+        for (int i = 0; i < Math.min(imageList.size(), imageViews.length); i++) {
+            String imageUrl = imageList.get(i);
+            ImageView imageView = imageViews[i];
+
+            Glide.with(requireContext())
+                    .load(imageUrl)
+                    .apply(RequestOptions.bitmapTransform(new RoundedCorners(132)))
+                    .into(imageView);
+        }
+        blurView();
+    }
+    private void blurView(){
+        float radius = 20f;
+        BlurView blurView =  getActivity().findViewById(R.id.allSongBlueView);
+        View decorView = getActivity().getWindow().getDecorView();
+        ViewGroup rootView = (ViewGroup) decorView.findViewById(android.R.id.content);
+
+        Drawable windowBackground = decorView.getBackground();
+
+        blurView.setupWith(rootView, new RenderScriptBlur(getActivity())) // or RenderEffectBlur
+                .setFrameClearDrawable(windowBackground) // Optional
+                .setBlurRadius(radius);
     }
 }
