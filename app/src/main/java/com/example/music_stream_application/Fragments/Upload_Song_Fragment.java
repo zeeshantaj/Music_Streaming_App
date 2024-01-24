@@ -61,8 +61,7 @@ public class Upload_Song_Fragment extends Fragment {
     private MaterialButton uploadBtn;
     private TextInputEditText songTile, singerName;
     private TextView audioPickTxt;
-    private static final int PICK_AUDIO_REQUEST = 99;
-    String[] categoriesArray = {"English", "Hindi", "Rap", "Classical", "Romantic", "Party"};
+    String[] categoriesArray = {"English", "Rap", "Classical", "Romantic", "Party"};
     private ProgressBar uploadProgressBar;
     private TextView progressPercentageTextView;
     private String category;

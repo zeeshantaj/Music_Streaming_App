@@ -6,22 +6,16 @@ import androidx.annotation.OptIn;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.media3.common.util.Log;
 import androidx.media3.common.util.UnstableApi;
-import androidx.media3.exoplayer.DefaultLoadControl;
-import androidx.media3.exoplayer.DefaultRenderersFactory;
-import androidx.media3.exoplayer.SimpleExoPlayer;
-import androidx.media3.exoplayer.source.MediaSource;
-import androidx.media3.exoplayer.source.ProgressiveMediaSource;
-import androidx.media3.exoplayer.trackselection.DefaultTrackSelector;
-import androidx.media3.ui.PlayerView;
-
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -29,23 +23,21 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.example.music_stream_application.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.Transaction;
-
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Locale;
+
+import eightbitlab.com.blurview.BlurView;
+import eightbitlab.com.blurview.RenderScriptBlur;
 
 public class Player_Activity extends AppCompatActivity {
 
@@ -80,6 +72,7 @@ public class Player_Activity extends AppCompatActivity {
         startTime = findViewById(R.id.startTime);
         endTime = findViewById(R.id.endTime);
         seekBar = findViewById(R.id.seekBar);
+        LinearLayout rootContainer = findViewById(R.id.play_activity_container);
         playingGif = findViewById(R.id.song_gif_image_view);
 
         handler = new Handler();
@@ -103,10 +96,24 @@ public class Player_Activity extends AppCompatActivity {
         singerName.setText(name);
         Glide.with(this)
                 .load(img)
-                .apply(RequestOptions.bitmapTransform(new RoundedCorners(32)))
+                .into(new SimpleTarget<Drawable>() {
+                    @Override
+                    public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                        // Set the Drawable as the background of the container
+                        rootContainer.setBackground(resource);
+                    }
+                });
+        Glide.with(this)
+                .load(img)
+                .apply(RequestOptions.bitmapTransform(new RoundedCorners(132)))
                 .into(songImage);
 
-            try {
+        Glide.with(this)
+                .load(R.drawable.media_playing)
+                .into(playingGif);
+
+
+        try {
                 mediaPlayer.setDataSource(songUrl);
             }
             catch (IOException e){
@@ -127,6 +134,7 @@ public class Player_Activity extends AppCompatActivity {
                 endTime.setText(formattedTime);
                 isPlaying = true;
                 viewCount += 1;
+
 
                 addViewCount();
             }
@@ -158,12 +166,12 @@ public class Player_Activity extends AppCompatActivity {
             if (isPlaying){
                 mediaPlayer.pause();
                 isPlaying = false;
-             //   playingGif.setVisibility(View.GONE);
+                playingGif.setVisibility(View.GONE);
             } else {
                 mediaPlayer.start();
                 isPlaying = true;
                 playingGif.setVisibility(View.VISIBLE);
-               // playBtn.setImageResource(R.drawable.play_icon);
+                playBtn.setImageResource(R.drawable.play_icon);
             }
         });
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -193,10 +201,31 @@ public class Player_Activity extends AppCompatActivity {
             }
         });
 
+        blurView();
+    }
+    private void blurView(){
+        float radius = 20f;
+
+        BlurView blurView = findViewById(R.id.blurView);
+        View decorView = getWindow().getDecorView();
+        // ViewGroup you want to start blur from. Choose root as close to BlurView in hierarchy as possible.
+        ViewGroup rootView = (ViewGroup) decorView.findViewById(android.R.id.content);
+
+        // Optional:
+        // Set drawable to draw in the beginning of each blurred frame.
+        // Can be used in case your layout has a lot of transparent space and your content
+        // gets a too low alpha value after blur is applied.
+        Drawable windowBackground = decorView.getBackground();
+
+        blurView.setupWith(rootView, new RenderScriptBlur(this)) // or RenderEffectBlur
+                .setFrameClearDrawable(windowBackground) // Optional
+                .setBlurRadius(radius);
     }
     private void addViewCount(){
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
         String documentPath = "category/"+categoryType+"/" + categoryType + "/" + title;
+
+        System.out.println("doc Path "+documentPath);
 
         firestore.runTransaction(new Transaction.Function<Void>() {
                     @Nullable
@@ -207,6 +236,9 @@ public class Player_Activity extends AppCompatActivity {
                         // Retrieve current viewCount
                         DocumentSnapshot documentSnapshot = transaction.get(documentReference);
                         int currentCount = documentSnapshot.getLong("viewCount").intValue();
+
+                        String name = documentSnapshot.get("title",String.class);
+                        System.out.println("title "+name);
 
                         // Increment viewCount by 1
                         transaction.update(documentReference, "viewCount", currentCount + 1);
@@ -224,17 +256,9 @@ public class Player_Activity extends AppCompatActivity {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         Toast.makeText(Player_Activity.this, "Error "+e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                        System.out.println("Error "+e.getLocalizedMessage());
                     }
                 });
-        firestore.document(documentPath).addSnapshotListener(new EventListener<DocumentSnapshot>() {
-            @Override
-            public void onEvent(@Nullable DocumentSnapshot value, @Nullable FirebaseFirestoreException error) {
-                int currentCount = value.get("viewCount",Integer.class);
-                String singerName = value.get("singerName",String.class);
-                System.out.println("document value "+currentCount+singerName);
-
-            }
-        });
 
 
     }
