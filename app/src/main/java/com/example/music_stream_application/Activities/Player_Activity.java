@@ -28,10 +28,12 @@ import com.bumptech.glide.request.transition.Transition;
 import com.example.music_stream_application.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.Transaction;
 import java.io.IOException;
 import java.util.Locale;
@@ -54,6 +56,7 @@ public class Player_Activity extends AppCompatActivity {
     private int viewCount = 0;
     private String songUrl,title,categoryType;
     SharedPreferences sharedPreferences;
+    long songID;
     @OptIn(markerClass = UnstableApi.class) @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,6 +92,7 @@ public class Player_Activity extends AppCompatActivity {
         String name = intent.getStringExtra("singerName");
         String img = intent.getStringExtra("songImage");
         songUrl = intent.getStringExtra("songUrl");
+        songID = intent.getLongExtra("songID",0);
 
         Log.e("MyApp","SongUrl "+songUrl);
 
@@ -133,9 +137,6 @@ public class Player_Activity extends AppCompatActivity {
                 String formattedTime = millisecondsToTime(duration);
                 endTime.setText(formattedTime);
                 isPlaying = true;
-                viewCount += 1;
-
-
                 addViewCount();
             }
         });
@@ -222,42 +223,84 @@ public class Player_Activity extends AppCompatActivity {
                 .setBlurRadius(radius);
     }
     private void addViewCount(){
+//        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+//        String documentPath = "category/"+categoryType+"/" + categoryType + "/" + title;
+//
+//        System.out.println("doc Path "+documentPath);
+//
+//        firestore.runTransaction(new Transaction.Function<Void>() {
+//                    @Nullable
+//                    @Override
+//                    public Void apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
+//                        DocumentReference documentReference = firestore.document(documentPath);
+//
+//                        // Retrieve current viewCount
+//                        DocumentSnapshot documentSnapshot = transaction.get(documentReference);
+//                        int currentCount = documentSnapshot.getLong("viewCount").intValue();
+//
+//                        String name = documentSnapshot.get("title",String.class);
+//                        System.out.println("title "+name);
+//
+//                        // Increment viewCount by 1
+//                        transaction.update(documentReference, "viewCount", currentCount + 1);
+//
+//                        return null;
+//                    }
+//                })
+//                .addOnSuccessListener(new OnSuccessListener<Void>() {
+//                    @Override
+//                    public void onSuccess(Void aVoid) {
+//                        Toast.makeText(Player_Activity.this, "count++", Toast.LENGTH_SHORT).show();
+//                    }
+//                })
+//                .addOnFailureListener(new OnFailureListener() {
+//                    @Override
+//                    public void onFailure(@NonNull Exception e) {
+//                        Toast.makeText(Player_Activity.this, "Error "+e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+//                        System.out.println("Error "+e.getLocalizedMessage());
+//                    }
+//                });
+        System.out.println("addViewCount");
         FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-        String documentPath = "category/"+categoryType+"/" + categoryType + "/" + title;
+        firestore.collection("category").get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    for (QueryDocumentSnapshot categoryDocument : queryDocumentSnapshots) {
+                        String categoryName = categoryDocument.getId();
+                        CollectionReference songsCollection = categoryDocument.getReference().collection(categoryName);
+                        songsCollection.get().addOnSuccessListener(songQueryDocumentSnapshots -> {
+                            for (QueryDocumentSnapshot songDocument : songQueryDocumentSnapshots) {
 
-        System.out.println("doc Path "+documentPath);
+                                long id = songDocument.getLong("id").longValue();
+                                long viewCount = songDocument.getLong("viewCount").longValue();
 
-        firestore.runTransaction(new Transaction.Function<Void>() {
-                    @Nullable
-                    @Override
-                    public Void apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
-                        DocumentReference documentReference = firestore.document(documentPath);
+                                if (id == songID) {
+                                    // Update the viewCount for the matching songID
+                                    long updatedViewCount = viewCount + 1;
 
-                        // Retrieve current viewCount
-                        DocumentSnapshot documentSnapshot = transaction.get(documentReference);
-                        int currentCount = documentSnapshot.getLong("viewCount").intValue();
+                                    System.out.println("Id"+id);
+                                    // Get the DocumentReference for the specific document
+                                    DocumentReference songDocRef = songDocument.getReference();
 
-                        String name = documentSnapshot.get("title",String.class);
-                        System.out.println("title "+name);
+                                    // Update the viewCount field
+                                    songDocRef.update("viewCount", updatedViewCount)
+                                            .addOnSuccessListener(aVoid -> {
+                                                // Successfully updated viewCount
+                                                Toast.makeText(this, "increment by 1 " , Toast.LENGTH_SHORT).show();
+                                            })
+                                            .addOnFailureListener(e -> {
+                                                // Handle failure to update viewCount
+                                                Toast.makeText(this, "Error " + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                                            });
+                                }
+                            }
 
-                        // Increment viewCount by 1
-                        transaction.update(documentReference, "viewCount", currentCount + 1);
-
-                        return null;
+                        }).addOnFailureListener(e -> {
+                            Toast.makeText(this, "Error " + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                        });
                     }
                 })
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Toast.makeText(Player_Activity.this, "count++", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(Player_Activity.this, "Error "+e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-                        System.out.println("Error "+e.getLocalizedMessage());
-                    }
+                .addOnFailureListener(e -> {
+                    Toast.makeText(this, "Error " + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                 });
 
 

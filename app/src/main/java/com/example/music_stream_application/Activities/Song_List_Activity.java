@@ -84,25 +84,6 @@ public class Song_List_Activity extends AppCompatActivity {
 
             }
         });
-//        searchView.addTextChangeListener(new TextWatcher() {
-//            @Override
-//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-//
-//            }
-//
-//            @Override
-//            public void onTextChanged(CharSequence s, int start, int before, int count) {
-//
-//            }
-//
-//            @Override
-//            public void afterTextChanged(Editable s) {
-//                Log.e("MyApp","cat name "+s.toString());
-//                performSearch(searchView.getText());
-//
-//
-//            }
-//        });
 
         listRecycler = findViewById(R.id.songListRecycler);
         layoutManager = new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false);
