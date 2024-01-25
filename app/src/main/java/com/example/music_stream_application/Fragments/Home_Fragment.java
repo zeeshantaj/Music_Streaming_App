@@ -1,5 +1,8 @@
 package com.example.music_stream_application.Fragments;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -265,18 +268,26 @@ public class Home_Fragment extends Fragment {
             String imageUrl = imageList.get(i);
             ImageView imageView = imageViews[newPosition];
 
-            // Use ObjectAnimator to animate translation in the Y-axis
-            ObjectAnimator animator = ObjectAnimator.ofFloat(imageView, "translationY", 0f, -imageView.getHeight());
-            animator.setDuration(ANIMATION_DURATION);
-            animator.start();
+            // Use ObjectAnimator to animate alpha for fading in and out
+            ObjectAnimator fadeAnimator = ObjectAnimator.ofFloat(imageView, "alpha", 1f, 0f);
+            fadeAnimator.setDuration(ANIMATION_DURATION); // Adjust duration as needed
 
-            // Load new image into the ImageView using Glide after animation completes
-            handler.postDelayed(() -> {
-                Glide.with(requireContext())
-                        .load(imageUrl)
-                        .apply(RequestOptions.bitmapTransform(new RoundedCorners(132)))
-                        .into(imageView);
-            }, ANIMATION_DURATION);
+            // Use an AnimatorListener to load new image after animation completes
+            fadeAnimator.addListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    // Load new image into the ImageView using Glide after animation completes
+                    Glide.with(requireContext())
+                            .load(imageUrl)
+                            .apply(RequestOptions.bitmapTransform(new RoundedCorners(132)))
+                            .into(imageView);
+
+                    // Reset alpha to prepare for the next animation
+                    imageView.setAlpha(1f);
+                }
+            });
+
+            fadeAnimator.start();
         }
     }
     private void blurView(){
