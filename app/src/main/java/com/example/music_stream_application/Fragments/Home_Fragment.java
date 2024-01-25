@@ -1,9 +1,11 @@
 package com.example.music_stream_application.Fragments;
 
+import android.animation.ObjectAnimator;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -61,6 +63,11 @@ public class Home_Fragment extends Fragment {
     private List<String> imageList;
 
     private LinearLayout allSongContainer;
+    private ImageView[] imageViews;
+    private int currentPosition = 0;
+    private Handler handler = new Handler();
+    private static final int ANIMATION_DURATION = 1000; // in milliseconds
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -205,7 +212,7 @@ public class Home_Fragment extends Fragment {
 
     private void loadImagesIntoImageViews() {
         // Assuming you have an array of ImageViews in your layout
-        ImageView[] imageViews = new ImageView[]{
+        imageViews = new ImageView[]{
                 getActivity().findViewById(R.id.img),
                 getActivity().findViewById(R.id.img1),
                 getActivity().findViewById(R.id.img2),
@@ -233,7 +240,44 @@ public class Home_Fragment extends Fragment {
                     .apply(RequestOptions.bitmapTransform(new RoundedCorners(132)))
                     .into(imageView);
         }
+        loadImages();
+
+        // Schedule the animation task to run every 5 seconds
+        handler.postDelayed(imageChangeRunnable, 5000);
         blurView();
+    }
+    private Runnable imageChangeRunnable = new Runnable() {
+        @Override
+        public void run() {
+            // Increment the current position
+            currentPosition = (currentPosition + 1) % imageList.size();
+
+            // Load new images and animate positions
+            loadImages();
+
+            // Schedule the next iteration after 5 seconds
+            handler.postDelayed(this, 5000);
+        }
+    };
+    private void loadImages() {
+        for (int i = 0; i < Math.min(imageList.size(), imageViews.length); i++) {
+            int newPosition = (i + currentPosition) % imageViews.length;
+            String imageUrl = imageList.get(i);
+            ImageView imageView = imageViews[newPosition];
+
+            // Use ObjectAnimator to animate translation in the Y-axis
+            ObjectAnimator animator = ObjectAnimator.ofFloat(imageView, "translationY", 0f, -imageView.getHeight());
+            animator.setDuration(ANIMATION_DURATION);
+            animator.start();
+
+            // Load new image into the ImageView using Glide after animation completes
+            handler.postDelayed(() -> {
+                Glide.with(requireContext())
+                        .load(imageUrl)
+                        .apply(RequestOptions.bitmapTransform(new RoundedCorners(132)))
+                        .into(imageView);
+            }, ANIMATION_DURATION);
+        }
     }
     private void blurView(){
         float radius = 20f;
