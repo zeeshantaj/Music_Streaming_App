@@ -6,5 +6,6 @@
     <color name="grey">#D5D6DC</color>
     <color name="ice">#CFE6F8</color>
     <color name="green">#4CAF50</color>
+    <color name="red">#F44336</color>
 
 </resources>

@@ -1,5 +1,6 @@
 package com.example.music_stream_application.Fragments;
 
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -20,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
+import com.example.music_stream_application.Activities.Song_List_Activity;
 import com.example.music_stream_application.Adapter.Category_Adapter;
 import com.example.music_stream_application.Adapter.TrendingAdapter;
 import com.example.music_stream_application.MainActivity;
@@ -71,7 +73,10 @@ public class Home_Fragment extends Fragment {
         getAllSongImage();
 
         allSongContainer.setOnClickListener(v -> {
-            Toast.makeText(getActivity(), "CLicked", Toast.LENGTH_SHORT).show();
+            Intent intent = new Intent(v.getContext(), Song_List_Activity.class);
+            intent.putExtra("isCategory",false);
+
+            v.getContext().startActivity(intent);
         });
 
     }

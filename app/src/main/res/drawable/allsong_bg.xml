@@ -6,6 +6,5 @@
         android:startColor="@color/black"
         android:endColor="@color/ice"/>
 
-    <corners android:radius="20dp"/>
 
 </shape>

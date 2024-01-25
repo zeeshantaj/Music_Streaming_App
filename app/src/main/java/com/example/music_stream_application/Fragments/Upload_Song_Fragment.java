@@ -2,9 +2,11 @@ package com.example.music_stream_application.Fragments;
 
 import static android.app.Activity.RESULT_OK;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
@@ -14,6 +16,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -23,6 +26,7 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
 import com.example.music_stream_application.Activities.Song_List_Activity;
@@ -65,6 +69,7 @@ public class Upload_Song_Fragment extends Fragment {
     private ProgressBar uploadProgressBar;
     private TextView progressPercentageTextView;
     private String category;
+    private ConstraintLayout uploadSongContainer;
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -74,6 +79,7 @@ public class Upload_Song_Fragment extends Fragment {
         songTile = view.findViewById(R.id.songTile);
         singerName = view.findViewById(R.id.singerName);
         audioPickTxt = view.findViewById(R.id.audioPickTxt);
+        uploadSongContainer = view.findViewById(R.id.uploadSongContainer);
         uploadProgressBar = view.findViewById(R.id.your_upload_progress_bar_id);
         progressPercentageTextView = view.findViewById(R.id.your_progress_percentage_text_view_id);
 
@@ -240,17 +246,47 @@ public class Upload_Song_Fragment extends Fragment {
         });
     }
     private void snackBar(){
-        Snackbar snackbar = Snackbar.make(getActivity().findViewById(android.R.id.content),
-                "Upload complete!",
-                Snackbar.LENGTH_INDEFINITE);
-        snackbar.setAction("View", v -> {
+//        Snackbar snackbar = Snackbar.make(getActivity().findViewById(android.R.id.content),
+//                "Upload complete!",
+//                Snackbar.LENGTH_INDEFINITE);
+//        snackbar.setAction("View", v -> {
+//
+//            Intent intent = new Intent(getActivity(), Song_List_Activity.class);
+//            intent.putExtra("categoryName",category);
+//            intent.putExtra("isCategory",true);
+//            startActivity(intent);
+//        });
+//
+//        // Show the Snackbar
+//        snackbar.show();
+        Snackbar snackbar = Snackbar.make(uploadSongContainer, "", Snackbar.LENGTH_INDEFINITE);
+        View customSnackbarView = getLayoutInflater().inflate(R.layout.custom_snackbar, null);
+        snackbar.getView().setBackgroundColor(Color.TRANSPARENT); // Make Snackbar background transparent
+        @SuppressLint("RestrictedApi") Snackbar.SnackbarLayout snackbarLayout = (Snackbar.SnackbarLayout) snackbar.getView();
+        snackbarLayout.addView(customSnackbarView, 0);
 
-            Intent intent = new Intent(getActivity(), Song_List_Activity.class);
-            intent.putExtra("categoryName",category);
-            startActivity(intent);
+        Button btnView = customSnackbarView.findViewById(R.id.btnView);
+        Button btnDismiss = customSnackbarView.findViewById(R.id.btnDismiss);
+
+        btnView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(getActivity(), Song_List_Activity.class);
+                intent.putExtra("categoryName", category);
+                intent.putExtra("isCategory", true);
+                startActivity(intent);
+                snackbar.dismiss(); // Dismiss the snackbar if needed
+            }
         });
 
-        // Show the Snackbar
+        btnDismiss.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                snackbar.dismiss(); // Dismiss the snackbar if needed
+                // Your negative action logic here
+            }
+        });
+
         snackbar.show();
     }
 
