@@ -16,10 +16,11 @@
         app:layout_constraintTop_toTopOf="parent"
         app:mt_hint="Search Song Here"
         app:mt_hintColor="@color/ice"
-        app:mt_maxSuggestionsCount="10"
+        app:mt_maxSuggestionsCount="4"
         app:mt_placeholder="Search Song Here"
         app:mt_placeholderColor="@color/black"
         app:mt_speechMode="true"
+        app:mt_searchBarColor="@color/purple"
         app:mt_textColor="@color/black" />
 
     <androidx.recyclerview.widget.RecyclerView
