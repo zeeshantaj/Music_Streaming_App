@@ -62,11 +62,12 @@ public class FirebaseHelper {
                                 String singerName = songDocument.get("singerName", String.class);
                                 String imageUrl = songDocument.get("imageUrl", String.class);
                                 String songUrl = songDocument.get("songUrl", String.class);
+                                String userId = songDocument.get("userId", String.class);
                                 String catName = songDocument.get("categoryName", String.class);
                                 long id = songDocument.getLong("viewCount").longValue();
                                 int viewCount = songDocument.getLong("viewCount").intValue();
 
-                                SongModel songModel = new SongModel(title, singerName, imageUrl, songUrl, id, viewCount, catName);
+                                SongModel songModel = new SongModel(title, singerName, imageUrl, songUrl, id, viewCount, catName,userId);
                                 songListModelList.add(songModel);
                             }
 

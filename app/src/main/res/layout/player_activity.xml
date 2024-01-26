@@ -145,7 +145,6 @@
                     android:src="@drawable/fast_farword_icon"
                     android:layout_gravity="center_vertical" />
 
-
             </LinearLayout>
         </LinearLayout>
 

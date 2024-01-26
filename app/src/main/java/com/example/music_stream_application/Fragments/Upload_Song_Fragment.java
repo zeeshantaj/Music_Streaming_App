@@ -31,6 +31,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.music_stream_application.Activities.Song_List_Activity;
 import com.example.music_stream_application.Activities.Song_Upload_Activity;
+import com.example.music_stream_application.Login.LoginActivity;
 import com.example.music_stream_application.MethodUtils.MethodsUtil;
 import com.example.music_stream_application.Model.SongModel;
 import com.example.music_stream_application.R;
@@ -38,6 +39,8 @@ import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 import com.google.firebase.storage.FirebaseStorage;
@@ -71,6 +74,8 @@ public class Upload_Song_Fragment extends Fragment {
     private TextView progressPercentageTextView;
     private String category;
     private ConstraintLayout uploadSongContainer;
+
+    private FirebaseAuth auth;
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -83,6 +88,8 @@ public class Upload_Song_Fragment extends Fragment {
         uploadSongContainer = view.findViewById(R.id.uploadSongContainer);
         uploadProgressBar = view.findViewById(R.id.your_upload_progress_bar_id);
         progressPercentageTextView = view.findViewById(R.id.your_progress_percentage_text_view_id);
+
+        auth = FirebaseAuth.getInstance();
 
         imagePickLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -139,12 +146,25 @@ public class Upload_Song_Fragment extends Fragment {
                 Toast.makeText(getActivity(), "" + autoCompleteTextView.getText().toString(), Toast.LENGTH_SHORT).show();
             }
         });
+
         uploadBtn.setOnClickListener(v -> {
+
+
+            FirebaseUser user = auth.getCurrentUser();
+
 
             String title = songTile.getText().toString();
             String name = singerName.getText().toString();
+            String UID = auth.getUid();
             category = autoCompleteTextView.getText().toString();
-
+            if (user == null){
+                Toast.makeText(getActivity(), "User is not authenticated", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(getActivity(), LoginActivity.class));
+                return;
+            }
+            if (UID.isEmpty()){
+                Toast.makeText(getActivity(), "User not present", Toast.LENGTH_SHORT).show();
+            }
             if (title.isEmpty()) {
                 Toast.makeText(getActivity(), "SongTitle is empty", Toast.LENGTH_SHORT).show();
                 return;
@@ -165,7 +185,6 @@ public class Upload_Song_Fragment extends Fragment {
                 Toast.makeText(getActivity(), "Image is empty", Toast.LENGTH_SHORT).show();
                 return;
             }
-
 
             StorageReference storageRef = FirebaseStorage.getInstance().getReference();
 
@@ -217,7 +236,7 @@ public class Upload_Song_Fragment extends Fragment {
 
                                     int viewCount = 0;
 
-                                    SongModel songModel = new SongModel(title, name, imageDownloadUrl.toString(), audioDownloadUrl.toString(),id, viewCount,category);
+                                    SongModel songModel = new SongModel(title, name, imageDownloadUrl.toString(), audioDownloadUrl.toString(),id, viewCount,category,UID);
 
 
                                     FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -244,6 +263,7 @@ public class Upload_Song_Fragment extends Fragment {
                     uploadBtn.setEnabled(true);
                 });
             }
+
         });
     }
     private void snackBar(){
@@ -260,6 +280,8 @@ public class Upload_Song_Fragment extends Fragment {
 //
 //        // Show the Snackbar
 //        snackbar.show();
+
+
         Snackbar snackbar = Snackbar.make(uploadSongContainer, "", Snackbar.LENGTH_INDEFINITE);
         View customSnackbarView = getLayoutInflater().inflate(R.layout.custom_snackbar, null);
         snackbar.getView().setBackgroundColor(Color.TRANSPARENT); // Make Snackbar background transparent

@@ -45,17 +45,12 @@ public class Player_Activity extends AppCompatActivity {
     private SeekBar seekBar;
     private int total;
     private boolean isPlaying;
-    private int viewCount = 0;
     private String songUrl,title,categoryType;
     long songID;
     @OptIn(markerClass = UnstableApi.class) @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.player_activity);
-
-//        sharedPreferences = getSharedPreferences("categorySharedPreference",MODE_PRIVATE);
-//        categoryType = sharedPreferences.getString("categoryType","");
-
 
         singerName = findViewById(R.id.player_singerName);
         songName = findViewById(R.id.player_song_title_text_view);
@@ -214,45 +209,6 @@ public class Player_Activity extends AppCompatActivity {
                 .setFrameClearDrawable(windowBackground) // Optional
                 .setBlurRadius(radius);
     }
-//    private void addViewCount(){
-//        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-//        String documentPath = "category/"+categoryType+"/" + categoryType + "/" + title;
-//
-//        System.out.println("doc Path "+documentPath);
-//
-//        firestore.runTransaction(new Transaction.Function<Void>() {
-//                    @Nullable
-//                    @Override
-//                    public Void apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
-//                        DocumentReference documentReference = firestore.document(documentPath);
-//
-//                        // Retrieve current viewCount
-//                        DocumentSnapshot documentSnapshot = transaction.get(documentReference);
-//                        int currentCount = documentSnapshot.getLong("viewCount").intValue();
-//
-//                        String name = documentSnapshot.get("title",String.class);
-//                        System.out.println("title "+name);
-//
-//                        // Increment viewCount by 1
-//                        transaction.update(documentReference, "viewCount", currentCount + 1);
-//
-//                        return null;
-//                    }
-//                })
-//                .addOnSuccessListener(new OnSuccessListener<Void>() {
-//                    @Override
-//                    public void onSuccess(Void aVoid) {
-//                        Toast.makeText(Player_Activity.this, "count++", Toast.LENGTH_SHORT).show();
-//                    }
-//                })
-//                .addOnFailureListener(new OnFailureListener() {
-//                    @Override
-//                    public void onFailure(@NonNull Exception e) {
-//                        Toast.makeText(Player_Activity.this, "Error "+e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-//                        System.out.println("Error "+e.getLocalizedMessage());
-//                    }
-//                });
-//    }
 
     private void updateSeekBar() {
         handler.postDelayed(new Runnable() {
