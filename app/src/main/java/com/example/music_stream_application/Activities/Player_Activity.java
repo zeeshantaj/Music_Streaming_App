@@ -63,8 +63,8 @@ public class Player_Activity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.player_activity);
 
-        sharedPreferences = getSharedPreferences("categorySharedPreference",MODE_PRIVATE);
-        categoryType = sharedPreferences.getString("categoryType","");
+//        sharedPreferences = getSharedPreferences("categorySharedPreference",MODE_PRIVATE);
+//        categoryType = sharedPreferences.getString("categoryType","");
 
 
         singerName = findViewById(R.id.player_singerName);
@@ -93,6 +93,7 @@ public class Player_Activity extends AppCompatActivity {
         String name = intent.getStringExtra("singerName");
         String img = intent.getStringExtra("songImage");
         songUrl = intent.getStringExtra("songUrl");
+        categoryType = intent.getStringExtra("categoryName");
         songID = intent.getLongExtra("songID",0);
 
         Log.e("MyApp","SongUrl "+songUrl);
@@ -224,47 +225,43 @@ public class Player_Activity extends AppCompatActivity {
                 .setBlurRadius(radius);
     }
     private void addViewCount(){
-//        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-//        String documentPath = "category/"+categoryType+"/" + categoryType + "/" + title;
-//
-//        System.out.println("doc Path "+documentPath);
-//
-//        firestore.runTransaction(new Transaction.Function<Void>() {
-//                    @Nullable
-//                    @Override
-//                    public Void apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
-//                        DocumentReference documentReference = firestore.document(documentPath);
-//
-//                        // Retrieve current viewCount
-//                        DocumentSnapshot documentSnapshot = transaction.get(documentReference);
-//                        int currentCount = documentSnapshot.getLong("viewCount").intValue();
-//
-//                        String name = documentSnapshot.get("title",String.class);
-//                        System.out.println("title "+name);
-//
-//                        // Increment viewCount by 1
-//                        transaction.update(documentReference, "viewCount", currentCount + 1);
-//
-//                        return null;
-//                    }
-//                })
-//                .addOnSuccessListener(new OnSuccessListener<Void>() {
-//                    @Override
-//                    public void onSuccess(Void aVoid) {
-//                        Toast.makeText(Player_Activity.this, "count++", Toast.LENGTH_SHORT).show();
-//                    }
-//                })
-//                .addOnFailureListener(new OnFailureListener() {
-//                    @Override
-//                    public void onFailure(@NonNull Exception e) {
-//                        Toast.makeText(Player_Activity.this, "Error "+e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-//                        System.out.println("Error "+e.getLocalizedMessage());
-//                    }
-//                });
-        System.out.println("addViewCount");
+        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+        String documentPath = "category/"+categoryType+"/" + categoryType + "/" + title;
 
+        System.out.println("doc Path "+documentPath);
 
+        firestore.runTransaction(new Transaction.Function<Void>() {
+                    @Nullable
+                    @Override
+                    public Void apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
+                        DocumentReference documentReference = firestore.document(documentPath);
 
+                        // Retrieve current viewCount
+                        DocumentSnapshot documentSnapshot = transaction.get(documentReference);
+                        int currentCount = documentSnapshot.getLong("viewCount").intValue();
+
+                        String name = documentSnapshot.get("title",String.class);
+                        System.out.println("title "+name);
+
+                        // Increment viewCount by 1
+                        transaction.update(documentReference, "viewCount", currentCount + 1);
+
+                        return null;
+                    }
+                })
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Toast.makeText(Player_Activity.this, "count++", Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(Player_Activity.this, "Error "+e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                        System.out.println("Error "+e.getLocalizedMessage());
+                    }
+                });
     }
     public String millisecondsToTime(long milliseconds) {
         int hours = (int) (milliseconds / (1000 * 60 * 60));
@@ -309,6 +306,5 @@ public class Player_Activity extends AppCompatActivity {
         super.onDestroy();
 //        mediaPlayer.release();
 //        mediaPlayer.stop();
-        sharedPreferences.edit().clear();
     }
 }

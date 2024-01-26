@@ -53,6 +53,7 @@ public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.Viewho
             intent.putExtra("songImage",model.getImageUrl());
             intent.putExtra("songUrl",model.getSongUrl());
             intent.putExtra("songId",model.getId());
+            intent.putExtra("categoryName",model.getCategoryName());
             v.getContext().startActivity(intent);
 
 
