@@ -48,14 +48,6 @@ public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.Viewho
 
 
         holder.itemView.setOnClickListener(v -> {
-//            Intent intent = new Intent(v.getContext(), Player_Activity.class);
-//            intent.putExtra("songName",model.getTitle());
-//            intent.putExtra("singerName",model.getSingerName());
-//            intent.putExtra("songImage",model.getImageUrl());
-//            intent.putExtra("songUrl",model.getSongUrl());
-//            intent.putExtra("songId",model.getId());
-//            intent.putExtra("categoryName",model.getCategoryName());
-//            v.getContext().startActivity(intent);
             MethodsUtil.setIntent(v.getContext(),Player_Activity.class,model);
         });
 

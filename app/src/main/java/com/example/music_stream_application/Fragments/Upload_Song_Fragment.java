@@ -308,21 +308,4 @@ public class Upload_Song_Fragment extends Fragment {
         String progressText = progress + "%";
         progressPercentageTextView.setText(progressText);
     }
-
-//    private String getFileName(Uri uri) {
-//        String result = null;
-//        if (uri.getScheme().equals("content")) {
-//            try (Cursor cursor = getActivity().getContentResolver().query(uri, null, null, null, null)) {
-//                if (cursor != null && cursor.moveToFirst()) {
-//                    int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-//                    if (index != -1) {
-//                        result = cursor.getString(index);
-//                    }
-//                }
-//            }
-//        } else if (uri.getScheme().equals("file")) {
-//            result = new File(uri.getPath()).getName();
-//        }
-//        return result;
-//    }
 }

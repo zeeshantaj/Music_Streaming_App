@@ -7,7 +7,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.media3.common.util.Log;
 import androidx.media3.common.util.UnstableApi;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -18,7 +17,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
@@ -27,16 +25,8 @@ import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.example.music_stream_application.MethodUtils.MethodsUtil;
 import com.example.music_stream_application.R;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.Transaction;
+import com.example.music_stream_application.Utils.FirebaseHelper;
+
 import java.io.IOException;
 import java.util.Locale;
 
@@ -57,7 +47,6 @@ public class Player_Activity extends AppCompatActivity {
     private boolean isPlaying;
     private int viewCount = 0;
     private String songUrl,title,categoryType;
-    SharedPreferences sharedPreferences;
     long songID;
     @OptIn(markerClass = UnstableApi.class) @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -140,7 +129,7 @@ public class Player_Activity extends AppCompatActivity {
                 String formattedTime = MethodsUtil.millisecondsToTime(duration);
                 endTime.setText(formattedTime);
                 isPlaying = true;
-                addViewCount();
+                FirebaseHelper.updateListenCount(Player_Activity.this,categoryType,title);
             }
         });
         mediaPlayer.setOnBufferingUpdateListener(new MediaPlayer.OnBufferingUpdateListener() {
@@ -225,45 +214,45 @@ public class Player_Activity extends AppCompatActivity {
                 .setFrameClearDrawable(windowBackground) // Optional
                 .setBlurRadius(radius);
     }
-    private void addViewCount(){
-        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-        String documentPath = "category/"+categoryType+"/" + categoryType + "/" + title;
-
-        System.out.println("doc Path "+documentPath);
-
-        firestore.runTransaction(new Transaction.Function<Void>() {
-                    @Nullable
-                    @Override
-                    public Void apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
-                        DocumentReference documentReference = firestore.document(documentPath);
-
-                        // Retrieve current viewCount
-                        DocumentSnapshot documentSnapshot = transaction.get(documentReference);
-                        int currentCount = documentSnapshot.getLong("viewCount").intValue();
-
-                        String name = documentSnapshot.get("title",String.class);
-                        System.out.println("title "+name);
-
-                        // Increment viewCount by 1
-                        transaction.update(documentReference, "viewCount", currentCount + 1);
-
-                        return null;
-                    }
-                })
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Toast.makeText(Player_Activity.this, "count++", Toast.LENGTH_SHORT).show();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(Player_Activity.this, "Error "+e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-                        System.out.println("Error "+e.getLocalizedMessage());
-                    }
-                });
-    }
+//    private void addViewCount(){
+//        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
+//        String documentPath = "category/"+categoryType+"/" + categoryType + "/" + title;
+//
+//        System.out.println("doc Path "+documentPath);
+//
+//        firestore.runTransaction(new Transaction.Function<Void>() {
+//                    @Nullable
+//                    @Override
+//                    public Void apply(@NonNull Transaction transaction) throws FirebaseFirestoreException {
+//                        DocumentReference documentReference = firestore.document(documentPath);
+//
+//                        // Retrieve current viewCount
+//                        DocumentSnapshot documentSnapshot = transaction.get(documentReference);
+//                        int currentCount = documentSnapshot.getLong("viewCount").intValue();
+//
+//                        String name = documentSnapshot.get("title",String.class);
+//                        System.out.println("title "+name);
+//
+//                        // Increment viewCount by 1
+//                        transaction.update(documentReference, "viewCount", currentCount + 1);
+//
+//                        return null;
+//                    }
+//                })
+//                .addOnSuccessListener(new OnSuccessListener<Void>() {
+//                    @Override
+//                    public void onSuccess(Void aVoid) {
+//                        Toast.makeText(Player_Activity.this, "count++", Toast.LENGTH_SHORT).show();
+//                    }
+//                })
+//                .addOnFailureListener(new OnFailureListener() {
+//                    @Override
+//                    public void onFailure(@NonNull Exception e) {
+//                        Toast.makeText(Player_Activity.this, "Error "+e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+//                        System.out.println("Error "+e.getLocalizedMessage());
+//                    }
+//                });
+//    }
 
     private void updateSeekBar() {
         handler.postDelayed(new Runnable() {

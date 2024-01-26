@@ -57,8 +57,6 @@ public class TrendingAdapter extends RecyclerView.Adapter<TrendingAdapter.ViewHo
 //            intent.putExtra("songId",model.getId());
 //            intent.putExtra("categoryName",model.getCategoryName());
 //            v.getContext().startActivity(intent);
-
-
             MethodsUtil.setIntent(v.getContext(),Player_Activity.class,model);
 
         });
