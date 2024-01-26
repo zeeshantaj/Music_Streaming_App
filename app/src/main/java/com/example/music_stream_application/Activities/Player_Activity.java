@@ -34,6 +34,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Transaction;
 import java.io.IOException;
 import java.util.Locale;
@@ -261,47 +262,7 @@ public class Player_Activity extends AppCompatActivity {
 //                    }
 //                });
         System.out.println("addViewCount");
-        FirebaseFirestore firestore = FirebaseFirestore.getInstance();
-        firestore.collection("category").get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    for (QueryDocumentSnapshot categoryDocument : queryDocumentSnapshots) {
-                        String categoryName = categoryDocument.getId();
-                        CollectionReference songsCollection = categoryDocument.getReference().collection(categoryName);
-                        songsCollection.get().addOnSuccessListener(songQueryDocumentSnapshots -> {
-                            for (QueryDocumentSnapshot songDocument : songQueryDocumentSnapshots) {
 
-                                long id = songDocument.getLong("id").longValue();
-                                long viewCount = songDocument.getLong("viewCount").longValue();
-
-                                if (id == songID) {
-                                    // Update the viewCount for the matching songID
-                                    long updatedViewCount = viewCount + 1;
-
-                                    System.out.println("Id"+id);
-                                    // Get the DocumentReference for the specific document
-                                    DocumentReference songDocRef = songDocument.getReference();
-
-                                    // Update the viewCount field
-                                    songDocRef.update("viewCount", updatedViewCount)
-                                            .addOnSuccessListener(aVoid -> {
-                                                // Successfully updated viewCount
-                                                Toast.makeText(this, "increment by 1 " , Toast.LENGTH_SHORT).show();
-                                            })
-                                            .addOnFailureListener(e -> {
-                                                // Handle failure to update viewCount
-                                                Toast.makeText(this, "Error " + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-                                            });
-                                }
-                            }
-
-                        }).addOnFailureListener(e -> {
-                            Toast.makeText(this, "Error " + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-                        });
-                    }
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error " + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-                });
 
 
     }

@@ -1,7 +1,7 @@
 package com.example.music_stream_application.Model;
 
 public class SongModel {
-    private String title,singerName,imageUrl,songUrl;
+    private String title,singerName,imageUrl,songUrl,categoryName;
     private int viewCount;
     private long id;
 
@@ -9,13 +9,22 @@ public class SongModel {
     public SongModel() {
     }
 
-    public SongModel(String title, String singerName, String imageUrl, String songUrl, long id, int viewCount) {
+    public SongModel(String title, String singerName, String imageUrl, String songUrl, long id, int viewCount,String categoryName) {
         this.title = title;
         this.singerName = singerName;
         this.imageUrl = imageUrl;
         this.songUrl = songUrl;
         this.id = id;
         this.viewCount = viewCount;
+        this.categoryName = categoryName;
+    }
+
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
     }
 
     public int getViewCount() {

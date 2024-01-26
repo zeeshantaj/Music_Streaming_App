@@ -216,7 +216,7 @@ public class Upload_Song_Fragment extends Fragment {
 
                                     int viewCount = 0;
 
-                                    SongModel songModel = new SongModel(title, name, imageDownloadUrl.toString(), audioDownloadUrl.toString(),id, viewCount);
+                                    SongModel songModel = new SongModel(title, name, imageDownloadUrl.toString(), audioDownloadUrl.toString(),id, viewCount,category);
 
 
                                     FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -289,19 +289,6 @@ public class Upload_Song_Fragment extends Fragment {
 
         snackbar.show();
     }
-
-//    @Override
-//    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//
-//        if (requestCode == PICK_AUDIO_REQUEST && resultCode == RESULT_OK) {
-//            // The user picked an audio file. Handle the selected file here.
-//            selectedAudioUri = data.getData();
-//            String fileName = getFileName(selectedAudioUri);
-//            audioPickTxt.setText(fileName);
-//            // Do something with the selected audio file URI
-//        }
-//    }
 
     private void btnUiUpdate() {
         uploadBtn.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.baseline_check_24, 0);
