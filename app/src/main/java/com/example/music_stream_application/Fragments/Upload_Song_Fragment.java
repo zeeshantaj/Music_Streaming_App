@@ -31,6 +31,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.music_stream_application.Activities.Song_List_Activity;
 import com.example.music_stream_application.Activities.Song_Upload_Activity;
+import com.example.music_stream_application.MethodUtils.MethodsUtil;
 import com.example.music_stream_application.Model.SongModel;
 import com.example.music_stream_application.R;
 import com.github.dhaval2404.imagepicker.ImagePicker;
@@ -99,7 +100,7 @@ public class Upload_Song_Fragment extends Fragment {
                 result -> {
                     if (result != null) {
                         selectedAudioUri = result;
-                        String fileName = getFileName(selectedAudioUri);
+                        String fileName = MethodsUtil.getFileName(selectedAudioUri,getActivity());
                         audioPickTxt.setText(fileName);
                     }
                 });
@@ -308,20 +309,20 @@ public class Upload_Song_Fragment extends Fragment {
         progressPercentageTextView.setText(progressText);
     }
 
-    private String getFileName(Uri uri) {
-        String result = null;
-        if (uri.getScheme().equals("content")) {
-            try (Cursor cursor = getActivity().getContentResolver().query(uri, null, null, null, null)) {
-                if (cursor != null && cursor.moveToFirst()) {
-                    int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
-                    if (index != -1) {
-                        result = cursor.getString(index);
-                    }
-                }
-            }
-        } else if (uri.getScheme().equals("file")) {
-            result = new File(uri.getPath()).getName();
-        }
-        return result;
-    }
+//    private String getFileName(Uri uri) {
+//        String result = null;
+//        if (uri.getScheme().equals("content")) {
+//            try (Cursor cursor = getActivity().getContentResolver().query(uri, null, null, null, null)) {
+//                if (cursor != null && cursor.moveToFirst()) {
+//                    int index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+//                    if (index != -1) {
+//                        result = cursor.getString(index);
+//                    }
+//                }
+//            }
+//        } else if (uri.getScheme().equals("file")) {
+//            result = new File(uri.getPath()).getName();
+//        }
+//        return result;
+//    }
 }

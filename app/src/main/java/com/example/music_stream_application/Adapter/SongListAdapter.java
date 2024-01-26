@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.example.music_stream_application.Activities.Player_Activity;
 import com.example.music_stream_application.Interface.OnCurrentItemClicked;
+import com.example.music_stream_application.MethodUtils.MethodsUtil;
 import com.example.music_stream_application.Model.SongListModel;
 import com.example.music_stream_application.Model.SongModel;
 import com.example.music_stream_application.R;
@@ -47,16 +48,15 @@ public class SongListAdapter extends RecyclerView.Adapter<SongListAdapter.Viewho
 
 
         holder.itemView.setOnClickListener(v -> {
-            Intent intent = new Intent(v.getContext(), Player_Activity.class);
-            intent.putExtra("songName",model.getTitle());
-            intent.putExtra("singerName",model.getSingerName());
-            intent.putExtra("songImage",model.getImageUrl());
-            intent.putExtra("songUrl",model.getSongUrl());
-            intent.putExtra("songId",model.getId());
-            intent.putExtra("categoryName",model.getCategoryName());
-            v.getContext().startActivity(intent);
-
-
+//            Intent intent = new Intent(v.getContext(), Player_Activity.class);
+//            intent.putExtra("songName",model.getTitle());
+//            intent.putExtra("singerName",model.getSingerName());
+//            intent.putExtra("songImage",model.getImageUrl());
+//            intent.putExtra("songUrl",model.getSongUrl());
+//            intent.putExtra("songId",model.getId());
+//            intent.putExtra("categoryName",model.getCategoryName());
+//            v.getContext().startActivity(intent);
+            MethodsUtil.setIntent(v.getContext(),Player_Activity.class,model);
         });
 
 

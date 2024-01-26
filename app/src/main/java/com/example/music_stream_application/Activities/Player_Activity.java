@@ -25,6 +25,7 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.example.music_stream_application.MethodUtils.MethodsUtil;
 import com.example.music_stream_application.R;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -136,7 +137,7 @@ public class Player_Activity extends AppCompatActivity {
                 updateSeekBar();
 
                 int duration = mp.getDuration();
-                String formattedTime = millisecondsToTime(duration);
+                String formattedTime = MethodsUtil.millisecondsToTime(duration);
                 endTime.setText(formattedTime);
                 isPlaying = true;
                 addViewCount();
@@ -263,18 +264,7 @@ public class Player_Activity extends AppCompatActivity {
                     }
                 });
     }
-    public String millisecondsToTime(long milliseconds) {
-        int hours = (int) (milliseconds / (1000 * 60 * 60));
-        int minutes = (int) (milliseconds % (1000 * 60 * 60)) / (1000 * 60);
-        int seconds = (int) ((milliseconds % (1000 * 60 * 60)) % (1000 * 60) / 1000);
-        String time;
-        if (hours > 0) {
-            time = String.format(Locale.US,"%02d:%02d:%02d", hours, minutes, seconds);
-        } else {
-            time = String.format(Locale.US,"%02d:%02d", minutes, seconds);
-        }
-        return time;
-    }
+
     private void updateSeekBar() {
         handler.postDelayed(new Runnable() {
             @Override
