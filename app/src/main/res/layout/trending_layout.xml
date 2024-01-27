@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -9,26 +10,91 @@
 
     <ImageView
         android:id="@+id/trendImage"
-        android:layout_width="120dp"
-        android:layout_height="120dp"
+        android:layout_width="140dp"
+        android:layout_height="140dp"
         android:scaleType="fitXY"
-    />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 
-
-    <TextView
-        android:id="@+id/trendSongText"
-        android:layout_width="match_parent"
+    <eightbitlab.com.blurview.BlurView
+        android:id="@+id/trendBlurView"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:singleLine="true"
-        android:maxLines="1"
-        android:textColor="@color/ice"
-        android:scrollHorizontally="true"
-        android:textAlignment="center"
-        android:ellipsize="marquee"
-        android:marqueeRepeatLimit="marquee_forever"
-        android:clickable="true"
-        android:textSize="18sp"/>
+        android:layout_marginEnd="5dp"
+        android:layout_marginStart="5dp"
+        android:layout_marginBottom="8dp"
+        android:background="@drawable/trend_titel_txt_bg"
+        app:layout_constraintBottom_toBottomOf="@+id/trendImage"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="5dp"
+                android:background="@drawable/trend_titel_txt_bg"
+                android:orientation="vertical"
+                >
+
+                <TextView
+                    android:id="@+id/trendSongText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:ellipsize="marquee"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:maxLines="1"
+                    android:scrollHorizontally="true"
+                    android:singleLine="true"
+                    android:text="Mitwa"
+                    android:textAlignment="textStart"
+                    android:textColor="@color/white"
+                    android:textSize="14sp"
+                    android:layout_marginEnd="4dp"
+                    app:layout_constraintBottom_toTopOf="@+id/trendSingerName"
+                    app:layout_constraintEnd_toStartOf="@+id/imageView2"
+                    app:layout_constraintStart_toStartOf="@+id/trendSingerName"
+                    app:layout_constraintTop_toTopOf="@+id/imageView2" />
+
+                <TextView
+                    android:id="@+id/trendSingerName"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:ellipsize="marquee"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:maxLines="1"
+                    android:scrollHorizontally="true"
+                    android:singleLine="true"
+                    android:text="shafqat amanat ali"
+                    android:textAlignment="textStart"
+                    android:textColor="@color/white"
+                    android:textSize="10sp"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginStart="10dp"
+                    app:layout_constraintBottom_toBottomOf="@+id/imageView2"
+                    app:layout_constraintEnd_toStartOf="@+id/imageView2"
+                    app:layout_constraintStart_toStartOf="parent"
+                    tools:ignore="SmallSp" />
+
+                <ImageView
+                    android:id="@+id/imageView2"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:background="@drawable/white_circle"
+                    android:src="@drawable/pause_icon"
+                    android:layout_marginEnd="5dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+    </eightbitlab.com.blurview.BlurView>
 
 
-</LinearLayout>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

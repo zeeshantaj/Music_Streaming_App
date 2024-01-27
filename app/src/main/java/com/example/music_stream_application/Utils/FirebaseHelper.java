@@ -39,7 +39,9 @@ public class FirebaseHelper {
 
             return null;
         })
-                .addOnSuccessListener(aVoid -> Toast.makeText(context, "count++", Toast.LENGTH_SHORT).show())
+                .addOnSuccessListener(aVoid -> {
+
+                })
                 .addOnFailureListener(e -> {
                     Toast.makeText(context, "Error "+e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                     System.out.println("Error "+e.getLocalizedMessage());
