@@ -19,6 +19,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -65,7 +66,7 @@ public class Home_Fragment extends Fragment {
     private LinearLayout trendingContainer;
     private List<String> imageList;
 
-    private LinearLayout allSongContainer;
+    private CardView allSongContainer;
     private ImageView[] imageViews;
     private int currentPosition = 0;
     private Handler handler = new Handler();
@@ -291,15 +292,15 @@ public class Home_Fragment extends Fragment {
         }
     }
     private void blurView(){
-        float radius = 20f;
-        BlurView blurView =  getActivity().findViewById(R.id.allSongBlueView);
-        View decorView = getActivity().getWindow().getDecorView();
-        ViewGroup rootView = (ViewGroup) decorView.findViewById(android.R.id.content);
-
-        Drawable windowBackground = decorView.getBackground();
-
-        blurView.setupWith(rootView, new RenderScriptBlur(getActivity())) // or RenderEffectBlur
-                .setFrameClearDrawable(windowBackground) // Optional
-                .setBlurRadius(radius);
+//        float radius = 20f;
+//        BlurView blurView =  getActivity().findViewById(R.id.allSongBlueView);
+//        View decorView = getActivity().getWindow().getDecorView();
+//        ViewGroup rootView = (ViewGroup) decorView.findViewById(android.R.id.content);
+//
+//        Drawable windowBackground = decorView.getBackground();
+//
+//        blurView.setupWith(rootView, new RenderScriptBlur(getActivity())) // or RenderEffectBlur
+//                .setFrameClearDrawable(windowBackground) // Optional
+//                .setBlurRadius(radius);
     }
 }
