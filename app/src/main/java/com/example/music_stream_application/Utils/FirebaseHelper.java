@@ -10,6 +10,8 @@ import androidx.annotation.Nullable;
 import com.example.music_stream_application.Activities.Song_List_Activity;
 import com.example.music_stream_application.Adapter.SongListAdapter;
 import com.example.music_stream_application.Interface.FirebaseCallback;
+import com.example.music_stream_application.Interface.FirebaseCategoryCallBack;
+import com.example.music_stream_application.Model.CategoryModel;
 import com.example.music_stream_application.Model.SongModel;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -23,6 +25,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.Transaction;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 public class FirebaseHelper {
@@ -105,6 +108,24 @@ public class FirebaseHelper {
                     public void onFailure(@NonNull Exception e) {
                         callback.onFailure(e.getLocalizedMessage());
 
+                    }
+                });
+    }
+    public static void categoryData(FirebaseCategoryCallBack callback) {
+
+
+        FirebaseFirestore.getInstance().collection("category")
+                .get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                    @Override
+                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                        List<CategoryModel> categoryModelList = new ArrayList<>();
+                        categoryModelList = queryDocumentSnapshots.toObjects(CategoryModel.class);
+                        callback.onSuccessCategory(categoryModelList);
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                     callback.onFailure(e.getLocalizedMessage());
                     }
                 });
     }

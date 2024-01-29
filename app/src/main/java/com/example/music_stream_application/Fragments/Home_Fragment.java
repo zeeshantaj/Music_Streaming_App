@@ -30,10 +30,13 @@ import com.bumptech.glide.request.RequestOptions;
 import com.example.music_stream_application.Activities.Song_List_Activity;
 import com.example.music_stream_application.Adapter.Category_Adapter;
 import com.example.music_stream_application.Adapter.TrendingAdapter;
+import com.example.music_stream_application.Interface.FirebaseCallback;
+import com.example.music_stream_application.Interface.FirebaseCategoryCallBack;
 import com.example.music_stream_application.MainActivity;
 import com.example.music_stream_application.Model.CategoryModel;
 import com.example.music_stream_application.Model.SongModel;
 import com.example.music_stream_application.R;
+import com.example.music_stream_application.Utils.FirebaseHelper;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.CollectionReference;
@@ -79,7 +82,6 @@ public class Home_Fragment extends Fragment {
         trendingRecyclerView = view.findViewById(R.id.trending_recycler_view);
         trendingContainer = view.findViewById(R.id.trendingContainer);
         allSongContainer = view.findViewById(R.id.allSongContainer);
-        categoryData();
         trendingData();
         getAllSongImage();
 
@@ -90,29 +92,41 @@ public class Home_Fragment extends Fragment {
             v.getContext().startActivity(intent);
         });
 
+        FirebaseHelper.categoryData(new FirebaseCategoryCallBack() {
+            @Override
+            public void onSuccessCategory(List<CategoryModel> categoryModelList) {
+                categoryAdapter = new Category_Adapter(categoryModelList);
+                categoryRecyclerView.setAdapter(categoryAdapter);
+            }
+
+            @Override
+            public void onFailure(String error) {
+                Toast.makeText(getActivity(), "Error "+error, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
-    private void categoryData() {
-        categoryModelList = new ArrayList<>();
-
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false);
-        categoryRecyclerView.setLayoutManager(layoutManager);
-
-        FirebaseFirestore.getInstance().collection("category")
-                .get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                    @Override
-                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                        categoryModelList = queryDocumentSnapshots.toObjects(CategoryModel.class);
-                        categoryAdapter = new Category_Adapter(categoryModelList);
-                        categoryRecyclerView.setAdapter(categoryAdapter);
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(getActivity(), "Error " + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
-                    }
-                });
-    }
+//    private void categoryData() {
+//        categoryModelList = new ArrayList<>();
+//
+//        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false);
+//        categoryRecyclerView.setLayoutManager(layoutManager);
+//
+//        FirebaseFirestore.getInstance().collection("category")
+//                .get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+//                    @Override
+//                    public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+//                        categoryModelList = queryDocumentSnapshots.toObjects(CategoryModel.class);
+//                        categoryAdapter = new Category_Adapter(categoryModelList);
+//                        categoryRecyclerView.setAdapter(categoryAdapter);
+//                    }
+//                }).addOnFailureListener(new OnFailureListener() {
+//                    @Override
+//                    public void onFailure(@NonNull Exception e) {
+//                        Toast.makeText(getActivity(), "Error " + e.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+//                    }
+//                });
+//    }
     private void trendingData() {
         trendingList = new ArrayList<>();
 
