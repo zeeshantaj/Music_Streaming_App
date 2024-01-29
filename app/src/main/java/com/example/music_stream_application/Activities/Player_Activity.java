@@ -50,7 +50,7 @@ public class Player_Activity extends AppCompatActivity {
     @OptIn(markerClass = UnstableApi.class) @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.play_drag_layout);
+        setContentView(R.layout.player_activity);
 
         singerName = findViewById(R.id.player_singerName);
         songName = findViewById(R.id.player_song_title_text_view);
@@ -61,8 +61,8 @@ public class Player_Activity extends AppCompatActivity {
         startTime = findViewById(R.id.startTime);
         endTime = findViewById(R.id.endTime);
         seekBar = findViewById(R.id.seekBar);
-       // LinearLayout rootContainer = findViewById(R.id.play_activity_container);
-     //   playingGif = findViewById(R.id.song_gif_image_view);
+        LinearLayout rootContainer = findViewById(R.id.play_activity_container);
+        playingGif = findViewById(R.id.song_gif_image_view);
 
         handler = new Handler();
         mediaPlayer = new MediaPlayer();
@@ -85,23 +85,23 @@ public class Player_Activity extends AppCompatActivity {
 
         songName.setText(title);
         singerName.setText(name);
-//        Glide.with(this)
-//                .load(img)
-//                .into(new SimpleTarget<Drawable>() {
-//                    @Override
-//                    public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
-//                        // Set the Drawable as the background of the container
-//                        rootContainer.setBackground(resource);
-//                    }
-//                });
+        Glide.with(this)
+                .load(img)
+                .into(new SimpleTarget<Drawable>() {
+                    @Override
+                    public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                        // Set the Drawable as the background of the container
+                        rootContainer.setBackground(resource);
+                    }
+                });
         Glide.with(this)
                 .load(img)
                 .apply(RequestOptions.bitmapTransform(new RoundedCorners(132)))
                 .into(songImage);
 
-//        Glide.with(this)
-//                .load(R.drawable.media_playing)
-//                .into(playingGif);
+        Glide.with(this)
+                .load(R.drawable.media_playing)
+                .into(playingGif);
 
 
         try {
@@ -117,7 +117,7 @@ public class Player_Activity extends AppCompatActivity {
                 // Start playing when prepared
                 mediaPlayer.start();
 
-                //playingGif.setVisibility(View.VISIBLE);
+                playingGif.setVisibility(View.VISIBLE);
                 updateSeekBar();
 
                 int duration = mp.getDuration();
@@ -154,11 +154,11 @@ public class Player_Activity extends AppCompatActivity {
             if (isPlaying){
                 mediaPlayer.pause();
                 isPlaying = false;
-                //playingGif.setVisibility(View.GONE);
+                playingGif.setVisibility(View.GONE);
             } else {
                 mediaPlayer.start();
                 isPlaying = true;
-                //playingGif.setVisibility(View.VISIBLE);
+                playingGif.setVisibility(View.VISIBLE);
                 playBtn.setImageResource(R.drawable.play_icon);
             }
         });
@@ -194,20 +194,20 @@ public class Player_Activity extends AppCompatActivity {
     private void blurView(){
         float radius = 20f;
 
-//        BlurView blurView = findViewById(R.id.blurView);
-//        View decorView = getWindow().getDecorView();
-//        // ViewGroup you want to start blur from. Choose root as close to BlurView in hierarchy as possible.
-//        ViewGroup rootView = (ViewGroup) decorView.findViewById(android.R.id.content);
-//
-//        // Optional:
-//        // Set drawable to draw in the beginning of each blurred frame.
-//        // Can be used in case your layout has a lot of transparent space and your content
-//        // gets a too low alpha value after blur is applied.
-//        Drawable windowBackground = decorView.getBackground();
-//
-//        blurView.setupWith(rootView, new RenderScriptBlur(this)) // or RenderEffectBlur
-//                .setFrameClearDrawable(windowBackground) // Optional
-//                .setBlurRadius(radius);
+        BlurView blurView = findViewById(R.id.blurView);
+        View decorView = getWindow().getDecorView();
+        // ViewGroup you want to start blur from. Choose root as close to BlurView in hierarchy as possible.
+        ViewGroup rootView = (ViewGroup) decorView.findViewById(android.R.id.content);
+
+        // Optional:
+        // Set drawable to draw in the beginning of each blurred frame.
+        // Can be used in case your layout has a lot of transparent space and your content
+        // gets a too low alpha value after blur is applied.
+        Drawable windowBackground = decorView.getBackground();
+
+        blurView.setupWith(rootView, new RenderScriptBlur(this)) // or RenderEffectBlur
+                .setFrameClearDrawable(windowBackground) // Optional
+                .setBlurRadius(radius);
     }
 
     private void updateSeekBar() {

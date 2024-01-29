@@ -91,7 +91,8 @@ public class Home_Fragment extends Fragment {
 
             v.getContext().startActivity(intent);
         });
-
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false);
+        categoryRecyclerView.setLayoutManager(layoutManager);
         FirebaseHelper.categoryData(new FirebaseCategoryCallBack() {
             @Override
             public void onSuccessCategory(List<CategoryModel> categoryModelList) {
